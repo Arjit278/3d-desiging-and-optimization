@@ -316,6 +316,28 @@ with st.expander("🧠 Smart Design Configurator (2026 Specs)", expanded=True):
             ]
         )
 
+        # --------------------------------------
+        # 🎨 SIDE PATCH OPTIONS
+        # --------------------------------------
+        
+        side_patch_mode = st.selectbox(
+            "Side Patches",
+            [
+                "None",
+                "Full Side Patch (White)",
+                "Only Cylindrical Central (White)",
+                "Custom"
+            ]
+        )
+        
+        custom_side_patch = ""
+        
+        if side_patch_mode == "Custom":
+        
+            custom_side_patch = st.text_input(
+                "Custom Side Patch Instructions",
+                placeholder="e.g. Curved ivory side patch with contrast piping"
+            )
     with col_opt2:
 
         st.toggle("Color Control Mode")
@@ -361,7 +383,7 @@ STRICTLY preserve original Maruti Wagon R fixed headrest seat geometry.
 Do NOT generate detachable headrests.
 Maintain OEM WagonR seat proportions and upright cabin structure.
 Reference:
-https://www.marutisuzuki.com/wagonr
+https://www.carwale.com/maruti-suzuki-cars/wagon-r/images/maruti-suzuki-wagon-r-front-row-seats-442349/?category=interior
 """
 
         elif car == "Maruti Grand Vitara":
@@ -385,6 +407,32 @@ https://www.marutisuzuki.com/grand-vitara
                 else palette[i % len(palette)]
             )
 
+            # --------------------------------------
+            # 🎨 SIDE PATCH PROMPTS
+            # --------------------------------------
+            
+            side_patch_prompt = ""
+            
+            if side_patch_mode == "Full Side Patch (White)":
+            
+                side_patch_prompt = """
+            Full white side patches extending from shoulder
+            to lower seat base.
+            Premium OEM dual-tone execution.
+            """
+            
+            elif side_patch_mode == "Only Cylindrical Central (White)":
+            
+                side_patch_prompt = """
+            Only central cylindrical side inserts in white.
+            Keep outer bolsters black.
+            Minimal premium OEM styling.
+            """
+            
+            elif side_patch_mode == "Custom":
+            
+                side_patch_prompt = custom_side_patch
+            
             strict_prompt = f"""
 Ultra realistic automotive interior photography.
 
