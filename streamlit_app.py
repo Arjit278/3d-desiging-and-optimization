@@ -361,47 +361,45 @@ with st.expander("🧠 Smart Design Configurator (2026 Specs)", expanded=True):
 # OUTPUT
 # --------------------------------------
 
-st.subheader("🎨 AI-Generated Concepts")
+if generated_images:
 
-for idx, (img, c_name) in enumerate(generated_images):
+    st.subheader("🎨 AI-Generated Concepts")
 
-    # --------------------------------------
-    # IMAGE + INFO SIDE BY SIDE
-    # --------------------------------------
+    for idx, (img, c_name) in enumerate(generated_images):
 
-    img_col, info_col = st.columns([1.7, 1])
+        img_col, info_col = st.columns([1.7, 1])
 
-    # --------------------------------------
-    # LEFT IMAGE PANEL
-    # --------------------------------------
+        # --------------------------------------
+        # IMAGE PANEL
+        # --------------------------------------
 
-    with img_col:
+        with img_col:
 
-        st.image(
-            img,
-            caption=f"Variant: {c_name}",
-            use_container_width=True
-        )
+            st.image(
+                img,
+                caption=f"Variant: {c_name}",
+                use_container_width=True
+            )
 
-        buf = io.BytesIO()
+            buf = io.BytesIO()
 
-        img.save(buf, format="PNG")
+            img.save(buf, format="PNG")
 
-        st.download_button(
-            f"💾 Save {c_name}",
-            buf.getvalue(),
-            f"pictator_{c_name}.png",
-            key=f"save_{idx}"
-        )
+            st.download_button(
+                f"💾 Save {c_name}",
+                buf.getvalue(),
+                f"pictator_{c_name}.png",
+                key=f"save_{idx}"
+            )
 
-    # --------------------------------------
-    # RIGHT PROFESSIONAL INFO PANEL
-    # --------------------------------------
+        # --------------------------------------
+        # ANALYSIS PANEL
+        # --------------------------------------
 
-    with info_col:
+        with info_col:
 
-        st.markdown(
-            f"""
+            st.markdown(
+                f"""
 ### 📈 Flashmind Analysis
 
 **Vehicle:**  
@@ -438,12 +436,12 @@ for idx, (img, c_name) in enumerate(generated_images):
 
 {analysis}
 """
-        )
+            )
 
-    st.divider()
+        st.divider()
 
 # --------------------------------------
-# MARKET REFERENCES SECTION
+# MARKET REFERENCES
 # --------------------------------------
 
 st.subheader(
@@ -469,7 +467,6 @@ if market_refs:
                 ref["link"],
                 key=f"ref_{idx}"
             )
-
 # --------------------------------------
 # 📊 TECH STANDARDS
 # --------------------------------------
