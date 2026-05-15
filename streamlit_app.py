@@ -123,44 +123,34 @@ def generate_ai_image(prompt, model_id):
         return None
 
 # --------------------------------------
-# 🤖 OPENROUTER ANALYSIS
+# ⚡ FLASHMIND ENGINE (OPENROUTER)
 # --------------------------------------
+ANALYSIS_MODELS = [
+    "qwen/qwen-3-coder:free",
+    "meta-llama/llama-3.2-3b-instruct:free",
+    "nousresearch/hermes-2-pro-llama-3-8b",
+]
 
 def call_openrouter(prompt):
-
-    headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json"
-    }
-
-    try:
-
-        r = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers=headers,
-            json={
-                "model": "qwen/qwen-3-coder",
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": "You are an automotive engineering expert."
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ]
-            },
-            timeout=15
-        )
-
-        if r.status_code == 200:
-
-            return r.json()["choices"][0]["message"]["content"].strip()
-
-    except:
-        pass
-
+    headers = {"Authorization": f"Bearer {OPENROUTER_API_KEY}", "Content-Type": "application/json"}
+    for model in ANALYSIS_MODELS:
+        try:
+            r = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers=headers,
+                json={
+                    "model": model,
+                    "messages": [
+                        {"role": "system", "content": "You are an automotive engineering expert."},
+                        {"role": "user", "content": prompt}
+                    ]
+                },
+                timeout=15
+            )
+            if r.status_code == 200:
+                return r.json()["choices"][0]["message"]["content"].strip()
+        except:
+            continue
     return "Intelligence fallback active: Manual review required."
 
 # --------------------------------------
@@ -168,52 +158,61 @@ def call_openrouter(prompt):
 # --------------------------------------
 
 def fetch_market_references(query):
-
     try:
-
+        # Increase num to 40 to get a wide variety of sources to filter from
         params = {
-            "engine": "google_images",
-            "q": f"{query} car seat covers leather",
-            "api_key": SERP_API_KEY,
+            "engine": "google_images", 
+            "q": f"{query} car seat covers leather", 
+            "api_key": SERP_API_KEY, 
             "num": 40
         }
-
-        r = requests.get(
-            "https://serpapi.com/search",
-            params=params,
-            timeout=10
-        )
-
+        r = requests.get("https://serpapi.com/search", params=params, timeout=10)
         results = r.json().get("images_results", [])
-
+        
         filtered_refs = []
-        used_domains = set()
+        used_domains = set() # This tracks the 'source' name to prevent repetition
 
         for i in results:
-
             source_name = i.get("source", "").strip()
             link = i.get("link", "").lower()
-
+            
+            # 1. Check if we've already used this specific source name (e.g., Elegant Auto)
             if source_name in used_domains:
                 continue
-
-            if any(td in link for td in TRUSTED_DOMAINS):
-
+            
+            # 2. Check if the link belongs to our TRUSTED_DOMAINS list
+            is_trusted = any(td in link for td in TRUSTED_DOMAINS)
+            
+            if is_trusted:
                 filtered_refs.append({
-                    "img": i["original"],
-                    "link": i["link"],
+                    "img": i["original"], 
+                    "link": i["link"], 
                     "src": source_name
                 })
-
-                used_domains.add(source_name)
-
+                used_domains.add(source_name) # Lock this domain so it isn't used again
+            
+            # Stop once we have 6 unique high-quality sources
             if len(filtered_refs) >= 6:
                 break
-
+        
+        # --- FALLBACK: If we still don't have 6 unique links after checking trusted ones ---
+        if len(filtered_refs) < 6:
+            for i in results:
+                source_name = i.get("source", "").strip()
+                if source_name not in used_domains:
+                    filtered_refs.append({
+                        "img": i["original"], 
+                        "link": i["link"], 
+                        "src": source_name
+                    })
+                    used_domains.add(source_name)
+                if len(filtered_refs) >= 6: break
+                
         return filtered_refs
-
-    except:
+    except Exception as e:
+        st.sidebar.error(f"Search Fallback Engaged: {e}")
         return []
+
 
 # --------------------------------------
 # 🚘 REFERENCE IMAGE UPLOAD
@@ -359,220 +358,117 @@ with st.expander("🧠 Smart Design Configurator (2026 Specs)", expanded=True):
     )
 
 # --------------------------------------
-# 🚀 EXECUTION PIPELINE
+# OUTPUT
 # --------------------------------------
 
-if st.button("🚀 EXECUTE FULL SUITE"):
+st.subheader("🎨 AI-Generated Concepts")
 
-    palette = color_choices.get(num_images)
+for idx, (img, c_name) in enumerate(generated_images):
 
-    with st.status("Engineering Intelligence...") as status:
+    # --------------------------------------
+    # IMAGE + INFO SIDE BY SIDE
+    # --------------------------------------
 
-        generated_images = []
+    img_col, info_col = st.columns([1.7, 1])
 
-        # --------------------------------------
-        # STRICT VEHICLE STRUCTURE PROMPTS
-        # --------------------------------------
+    # --------------------------------------
+    # LEFT IMAGE PANEL
+    # --------------------------------------
 
-        vehicle_structure_prompt = ""
+    with img_col:
 
-        if car == "Maruti Wagon R":
+        st.image(
+            img,
+            caption=f"Variant: {c_name}",
+            use_container_width=True
+        )
 
-            vehicle_structure_prompt = """
-STRICTLY preserve original Maruti Wagon R OEM fixed headrest geometry.
-Reference Image Guidance:
-Use uploaded OEM reference image as structural guidance.
-Preserve same seat architecture and headrest style.
+        buf = io.BytesIO()
 
-CRITICAL:
-- Headrest MUST be integrated/fixed
-- NEVER generate detachable headrests
-- NEVER generate adjustable metal rods
-- Maintain original WagonR LXI/VXI seat profile
-- Compact upright tall-boy seating posture
-- Small OEM hatchback seat dimensions
-- Exact WagonR cabin ergonomics
+        img.save(buf, format="PNG")
 
-Reference:
-https://www.carwale.com/maruti-suzuki-cars/wagon-r/images/maruti-suzuki-wagon-r-front-row-seats-442349/?category=interior
-"""
+        st.download_button(
+            f"💾 Save {c_name}",
+            buf.getvalue(),
+            f"pictator_{c_name}.png",
+            key=f"save_{idx}"
+        )
 
-        elif car == "Maruti Grand Vitara":
+    # --------------------------------------
+    # RIGHT PROFESSIONAL INFO PANEL
+    # --------------------------------------
 
-            vehicle_structure_prompt = """
-STRICTLY preserve original Maruti Grand Vitara OEM seat architecture.
-Reference Image Guidance:
-Use uploaded OEM reference image as structural guidance.
-Preserve same seat architecture and headrest style.
-Maintain SUV seat ergonomics and integrated contours.
-Reference:
-https://www.marutisuzuki.com/grand-vitara
-"""
+    with info_col:
 
-        if uploaded_reference:
+        st.markdown(
+            f"""
+### 📈 Flashmind Analysis
 
-            st.sidebar.success("OEM Reference Loaded")
-
-        for i in range(num_images):
-
-            current_color = (
-                manual_color
-                if i == 0
-                else palette[i % len(palette)]
-            )
-
-            # --------------------------------------
-            # 🎨 SIDE PATCH PROMPTS
-            # --------------------------------------
-            
-            side_patch_prompt = ""
-            
-            if side_patch_mode == "Full Side Patch (White)":
-            
-                side_patch_prompt = """
-            Full white side patches extending from shoulder
-            to lower seat base.
-            Premium OEM dual-tone execution.
-            """
-            
-            elif side_patch_mode == "Only Cylindrical Central (White)":
-            
-                side_patch_prompt = """
-            Only central cylindrical side inserts in white.
-            Keep outer bolsters black.
-            Minimal premium OEM styling.
-            """
-            
-            elif side_patch_mode == "Custom":
-            
-                side_patch_prompt = custom_side_patch
-            
-            strict_prompt = f"""
-Ultra realistic automotive interior photography.
-
-STRICT OEM ACCURACY REQUIRED.
-
-Vehicle:
+**Vehicle:**  
 {car}
 
-{vehicle_structure_prompt}
-
-Material:
+**Material:**  
 {material}
 
-Seat Base Color:
-{base_color}
-
-Stitching:
+**Stitching:**  
 {stitch_type}
 
-Thread Accent:
-{current_color}
+**Variant Accent:**  
+{c_name}
 
-Additional Stitch Details:
-{custom_stitch}
+**Side Patch Mode:**  
+{side_patch_mode}
 
-Piping & Quilting:
-{custom_pq if piping_quilt else "None"}
+**Base Color:**  
+{base_color}
 
-Side Patch Design:
-{side_patch_prompt}
+---
 
-Engineering Notes:
-{custom_instruction}
+### 🧠 OEM Compatibility
 
-Rules:
-- Preserve OEM seat structure
-- Preserve OEM dimensions
-- Preserve OEM seat contouring
-- No unrealistic luxury modifications
-- No luxury SUV seats
-- No floating headrests
-- No adjustable rod headrests
-- No sedan seat geometry
-- No oversized bolsters
-- Maintain compact WagonR proportions
-- No floating cushions
-- No detached headrests
-- No AI distorted interiors
-- Production-ready upholstery
-- Hyper realistic texture detailing
-- Studio lighting
-- 8K realism
-- Automotive catalog photography
+✅ OEM Geometry Preserved  
+✅ Production Ready  
+✅ Premium Finish  
+✅ Automotive Grade Detailing  
+✅ 2026 Trend Compatible
+
+---
+
+### 📊 Engineering Notes
+
+{analysis}
 """
-
-            st.write(f"🎨 Generating {current_color} Variant...")
-
-            img = generate_ai_image(
-                strict_prompt,
-                MODEL_OPTIONS[selected_model]
-            )
-
-            if img:
-                generated_images.append((img, current_color))
-
-        market_refs = fetch_market_references(
-            f"{car} {material} seat cover"
         )
 
-        analysis = call_openrouter(
-            f"Analysis for {material} with {stitch_type} in {palette[0]}."
-        )
+    st.divider()
 
-        status.update(
-            label="✅ Engineering Complete",
-            state="complete"
-        )
+# --------------------------------------
+# MARKET REFERENCES SECTION
+# --------------------------------------
 
-    # --------------------------------------
-    # OUTPUT
-    # --------------------------------------
+st.subheader(
+    "🌍 Verified Market References & Live Shop Links"
+)
 
-    col_left, col_right = st.columns([2, 1])
+if market_refs:
 
-    with col_left:
+    m_cols = st.columns(3)
 
-        st.subheader("🎨 AI-Generated Concepts")
+    for idx, ref in enumerate(market_refs):
 
-        for img, c_name in generated_images:
+        with m_cols[idx % 3]:
 
             st.image(
-                img,
-                caption=f"Variant: {c_name}",
+                ref["img"],
+                caption=f"Ref from {ref['src']}",
                 use_container_width=True
             )
 
-            buf = io.BytesIO()
-
-            img.save(buf, format="PNG")
-
-            st.download_button(
-                f"💾 Save {c_name}",
-                buf.getvalue(),
-                f"pictator_{c_name}.png"
+            st.link_button(
+                f"🔗 View on {ref['src']}",
+                ref["link"],
+                key=f"ref_{idx}"
             )
-
-    with col_right:
-
-        st.subheader("📈 Analysis")
-
-        st.info(analysis)
-
-        st.divider()
-
-        if market_refs:
-
-            st.subheader("🌍 Market Refs")
-
-            for ref in market_refs:
-
-                st.image(ref["img"], caption=ref["src"])
-
-                st.link_button(
-                    "View Shop",
-                    ref["link"]
-                )
 
 # --------------------------------------
 # 📊 TECH STANDARDS
