@@ -249,10 +249,6 @@ with st.expander(
 
     colA, colB, colC = st.columns(3)
 
-    # --------------------------------------
-    # COLUMN A
-    # --------------------------------------
-
     with colA:
 
         car = st.selectbox(
@@ -285,10 +281,6 @@ with st.expander(
                 "Custom Stitch Details"
             )
 
-    # --------------------------------------
-    # COLUMN B
-    # --------------------------------------
-
     with colB:
 
         material = st.selectbox(
@@ -312,10 +304,6 @@ with st.expander(
             custom_pq = st.text_input(
                 "Custom Piping/Quilt Prompt"
             )
-
-    # --------------------------------------
-    # COLUMN C
-    # --------------------------------------
 
     with colC:
 
@@ -343,10 +331,6 @@ with st.expander(
 
     st.divider()
 
-    # --------------------------------------
-    # EXTRA OPTIONS
-    # --------------------------------------
-
     col_opt1, col_opt2 = st.columns(2)
 
     with col_opt1:
@@ -356,9 +340,24 @@ with st.expander(
         pattern_target = st.selectbox(
             "Pattern Target",
             [
+                "Base Design",
+                "Patch",
                 "Stitching",
-                "Piping",
-                "Base Design"
+                "Piping"
+            ]
+        )
+
+        pattern_color = st.selectbox(
+            "Pattern/Patch Color",
+            [
+                "White",
+                "Silver",
+                "Ivory",
+                "Red",
+                "Blue",
+                "Orange",
+                "Gold",
+                "Black"
             ]
         )
 
@@ -366,9 +365,9 @@ with st.expander(
             "Side Patches",
             [
                 "None",
-                "Full Side Patch silver",
-                "Only Cylindrical side patch silver",
-                "Head Rest patch silver",
+                "Full Side Patch",
+                "Only Cylindrical Side Patch",
+                "Head Rest Patch",
                 "Custom"
             ]
         )
@@ -411,33 +410,40 @@ if st.button("🚀 EXECUTE FULL SUITE"):
 
     generated_images = []
 
-    # --------------------------------------
-    # PALETTE
-    # --------------------------------------
-
     palette = color_choices.get(num_images)
-
-    # --------------------------------------
-    # VEHICLE RULES
-    # --------------------------------------
 
     vehicle_structure_prompt = ""
 
     if car == "Maruti Wagon R":
 
         vehicle_structure_prompt = """
-STRICTLY preserve original Maruti Wagon R OEM fixed headrest geometry.
+STRICTLY preserve original Maruti Wagon R OEM seat geometry.
 
-CRITICAL:
-- Headrest MUST be integrated/fixed
-- NEVER generate detachable headrests
-- NEVER generate adjustable rod headrests
-- Maintain compact WagonR proportions
-- Maintain upright hatchback ergonomics
-- Exact WagonR cabin structure
+ABSOLUTE REQUIREMENTS:
+- Fixed integrated headrest ONLY
+- Headrest merged with seat
+- NO detachable headrests
+- NO adjustable rod headrests
+- NO SUV seat styling
+- NO oversized bolsters
+- Maintain compact hatchback seat size
+- Maintain upright WagonR ergonomics
+- Maintain thin OEM seat profile
+- Maintain slim shoulder geometry
+
+IMPORTANT:
+Generate seats EXACTLY similar
+to OEM WagonR reference seats.
+
+Side shoulder patches must flow
+vertically from upper shoulders
+towards lower seat base.
+
+Use sporty OEM dual-tone styling.
 
 Reference:
-https://www.carwale.com/maruti-suzuki-cars/wagon-r/images/maruti-suzuki-wagon-r-front-row-seats-442349/?category=interior,
+https://www.carwale.com/maruti-suzuki-cars/wagon-r/images/maruti-suzuki-wagon-r-front-row-seats-442349/?category=interior
+
 https://www.marutisuzuki.com/wagonr
 """
 
@@ -450,33 +456,52 @@ Reference:
 https://www.marutisuzuki.com/grand-vitara
 """
 
-    # --------------------------------------
-    # SIDE PATCH
-    # --------------------------------------
-
     side_patch_prompt = ""
 
-    if side_patch_mode == "Full Side Patch (White)":
+    if side_patch_mode == "Full Side Patch":
 
-        side_patch_prompt = """
-Full white side patches extending from
-shoulder to lower seat base.
+        side_patch_prompt = f"""
+Generate sporty OEM dual-tone side patches.
+
+{pattern_color} side shoulder patches
+flowing vertically from upper shoulders
+towards lower seat base.
+
+Black outer bolsters.
+
+Premium sporty hatchback styling.
+
+Maintain compact OEM WagonR seat shape.
+
+Patch flow must resemble uploaded
+reference image style.
 """
 
-    elif side_patch_mode == "Only Cylindrical Central (White)":
+    elif side_patch_mode == "Only Cylindrical Side Patch":
 
-        side_patch_prompt = """
-Only central cylindrical inserts in white.
+        side_patch_prompt = f"""
+Generate cylindrical side inserts
+in {pattern_color} color.
+
 Keep outer bolsters black.
+
+Maintain sporty OEM hatchback styling.
+"""
+
+    elif side_patch_mode == "Head Rest Patch":
+
+        side_patch_prompt = f"""
+Generate integrated fixed headrest patch
+in {pattern_color} color.
+
+Headrest MUST remain fixed and integrated.
+
+Blend patch into upper shoulder design.
 """
 
     elif side_patch_mode == "Custom":
 
         side_patch_prompt = custom_side_patch
-
-    # --------------------------------------
-    # STATUS
-    # --------------------------------------
 
     with st.status("Engineering Intelligence..."):
 
@@ -488,17 +513,17 @@ Keep outer bolsters black.
                 else palette[i % len(palette)]
             )
 
-            # --------------------------------------
-            # COLOR RULES
-            # --------------------------------------
-
             color_rule = ""
 
             if color_control:
 
                 color_rule = f"""
 STRICTLY use {current_color}
-as stitching/accent color.
+for stitching/accent details.
+
+STRICTLY use {pattern_color}
+for {pattern_target} elements.
+
 Do not introduce random colors.
 """
 
@@ -507,10 +532,6 @@ Do not introduce random colors.
                 color_rule = """
 Creative complementary tones allowed.
 """
-
-            # --------------------------------------
-            # MAIN PROMPT
-            # --------------------------------------
 
             strict_prompt = f"""
 Professional automotive interior photography.
@@ -523,7 +544,8 @@ Vehicle:
 {vehicle_structure_prompt}
 
 Reference Image Guidance:
-Use uploaded OEM reference image as structural guidance.
+Use uploaded OEM reference image
+as structural guidance.
 
 Material:
 {material}
@@ -536,6 +558,12 @@ Stitching:
 
 Thread Accent:
 {current_color}
+
+Pattern Target:
+{pattern_target}
+
+Pattern Color:
+{pattern_color}
 
 {color_rule}
 
@@ -555,7 +583,9 @@ Rules:
 - Preserve OEM seat structure
 - Preserve OEM dimensions
 - Preserve OEM seat contouring
-- No unrealistic luxury modifications
+- Maintain WagonR compact proportions
+- Maintain integrated fixed headrest
+- No luxury SUV seats
 - No floating cushions
 - No detachable headrests
 - No adjustable rod headrests
@@ -582,26 +612,53 @@ Rules:
                     (img, current_color)
                 )
 
-        # --------------------------------------
-        # ANALYSIS
-        # --------------------------------------
-
         st.write(
             "📊 Running Flashmind Intelligence..."
         )
 
         analysis = call_openrouter(
             f"""
-Analyze durability, OEM compatibility,
-premium appeal and 2026 trends for
-{material} with {stitch_type}
-and {side_patch_mode}.
+You are Flashmind Automotive Intelligence 2026.
+
+Generate:
+- 5 to 7 concise bullet points
+- followed by 1 premium market summary
+
+Focus on:
+- 2026 upholstery trends
+- sporty hatchback interiors
+- premium dual-tone styling
+- integrated headrest trends
+- luxury stitching trends
+- ergonomic contour trends
+- premium side patch styling
+- Indian aftermarket trends
+- sporty OEM aesthetics
+
+Vehicle:
+{car}
+
+Material:
+{material}
+
+Stitching:
+{stitch_type}
+
+Patch Style:
+{side_patch_mode}
+
+Pattern Target:
+{pattern_target}
+
+Color:
+{pattern_color}
+
+Rules:
+- professional tone
+- concise bullets
+- premium automotive language
 """
         )
-
-        # --------------------------------------
-        # MARKET REFERENCES
-        # --------------------------------------
 
         st.write(
             "🌍 Fetching Market References..."
@@ -610,10 +667,6 @@ and {side_patch_mode}.
         market_refs = fetch_market_references(
             f"{car} {material} seat cover"
         )
-
-    # --------------------------------------
-    # OUTPUT
-    # --------------------------------------
 
     if generated_images:
 
@@ -624,10 +677,6 @@ and {side_patch_mode}.
         ):
 
             img_col, info_col = st.columns([1.7, 1])
-
-            # --------------------------------------
-            # IMAGE PANEL
-            # --------------------------------------
 
             with img_col:
 
@@ -648,57 +697,54 @@ and {side_patch_mode}.
                     key=f"save_{idx}"
                 )
 
-            # --------------------------------------
-            # INFO PANEL
-            # --------------------------------------
-
             with info_col:
 
                 st.markdown(
                     f"""
 ### 📈 Flashmind Analysis
 
-**Vehicle:**  
+#### 🚘 Vehicle
 {car}
 
-**Material:**  
+#### 🧵 Material
 {material}
 
-**Stitching:**  
+#### ✨ Stitching
 {stitch_type}
 
-**Variant Accent:**  
-{c_name}
+#### 🎨 Pattern Target
+{pattern_target}
 
-**Side Patch:**  
+#### 🛡️ Patch Style
 {side_patch_mode}
 
-**Base Color:**  
-{base_color}
+#### 🎯 Pattern Color
+{pattern_color}
+
+#### 🎨 Variant Accent
+{c_name}
 
 ---
 
 ### 🧠 OEM Compatibility
 
-✅ OEM Geometry Preserved  
-✅ Production Ready  
-✅ Premium Finish  
+✅ Fixed Headrest Geometry Preserved  
+✅ OEM Hatchback Seat Mapping  
+✅ Production Ready Design  
+✅ Premium Upholstery Finish  
 ✅ Automotive Grade Detailing  
-✅ 2026 Trend Compatible
+✅ 2026 Trend Compatible  
+✅ Ergonomic Compact Seat Profile  
 
 ---
 
-### 📊 Engineering Notes
+### 🔥 2026 Trend Intelligence
 
 {analysis}
 """
                 )
 
             st.divider()
-
-    # --------------------------------------
-    # MARKET REFERENCES
-    # --------------------------------------
 
     st.subheader(
         "🌍 Verified Market References & Live Shop Links"
@@ -746,7 +792,18 @@ with st.expander("📊 2026 Tech Standards"):
         "- Hyper-realistic automotive rendering active."
     )
 
+    st.write(
+        "- OEM WagonR fixed integrated headrest enforcement active."
+    )
+
+    st.write(
+        "- Reference-image guided side patch generation active."
+    )
+
+    st.write(
+        "- 2026 sporty hatchback upholstery intelligence enabled."
+    )
+
     st.caption(
         "Zero Data Retention (ZDR) Commitment"
     )
-
