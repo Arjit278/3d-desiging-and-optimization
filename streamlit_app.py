@@ -87,7 +87,22 @@ if not st.session_state.authenticated:
 MODEL_OPTIONS = {
     "⚡ FLUX.1 Schnell": "black-forest-labs/FLUX.1-schnell",
     "🔥 FLUX.1 Dev": "black-forest-labs/FLUX.1-dev",
-    "✨ SD 3.5 Large": "stabilityai/stable-diffusion-3.5-large"
+    "⚡ PaliGemma 2 3B": "google/paligemma2-3b-pt-448",
+    "✨ Pixtral 12B": "mistralai/Pixtral-12B-2409",
+    "🔥 GLM-4.1V 9B Thinking": "THUDM/glm-4-9b-chat",
+    "🏎️ Qwen2.5-VL 7B Instruct": "Qwen/Qwen2.5-VL-7B-Instruct"
+    # ⚡ Ultra-fast/Lightweight context & image editing (Under 1 second)
+    "🏎️ FLUX.2 Klein": "black-forest-labs/FLUX.2-klein-9b-fp8", 
+    
+    # 🎨 The Gold Standard for Context-aware Image-to-Image editing
+    "✨ FLUX.1 Kontext Dev": "black-forest-labs/FLUX.1-Kontext-dev",
+    
+    # 📐 Smart object insertion and canvas expanding (Inpainting/Outpainting)
+    "🪟 FLUX.1 Fill Dev": "black-forest-labs/FLUX.1-Fill-dev",
+    
+    # 🤖 Complete image-style transfer based on a prompt
+    "🌀 FLUX.1 Redux Dev": "black-forest-labs/FLUX.1-Redux-dev"
+    
 }
 
 selected_model = st.sidebar.selectbox(
