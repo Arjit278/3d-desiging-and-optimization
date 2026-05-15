@@ -379,9 +379,20 @@ if st.button("🚀 EXECUTE FULL SUITE"):
         if car == "Maruti Wagon R":
 
             vehicle_structure_prompt = """
-STRICTLY preserve original Maruti Wagon R fixed headrest seat geometry.
-Do NOT generate detachable headrests.
-Maintain OEM WagonR seat proportions and upright cabin structure.
+STRICTLY preserve original Maruti Wagon R OEM fixed headrest geometry.
+Reference Image Guidance:
+Use uploaded OEM reference image as structural guidance.
+Preserve same seat architecture and headrest style.
+
+CRITICAL:
+- Headrest MUST be integrated/fixed
+- NEVER generate detachable headrests
+- NEVER generate adjustable metal rods
+- Maintain original WagonR LXI/VXI seat profile
+- Compact upright tall-boy seating posture
+- Small OEM hatchback seat dimensions
+- Exact WagonR cabin ergonomics
+
 Reference:
 https://www.carwale.com/maruti-suzuki-cars/wagon-r/images/maruti-suzuki-wagon-r-front-row-seats-442349/?category=interior
 """
@@ -390,6 +401,9 @@ https://www.carwale.com/maruti-suzuki-cars/wagon-r/images/maruti-suzuki-wagon-r-
 
             vehicle_structure_prompt = """
 STRICTLY preserve original Maruti Grand Vitara OEM seat architecture.
+Reference Image Guidance:
+Use uploaded OEM reference image as structural guidance.
+Preserve same seat architecture and headrest style.
 Maintain SUV seat ergonomics and integrated contours.
 Reference:
 https://www.marutisuzuki.com/grand-vitara
@@ -461,6 +475,9 @@ Additional Stitch Details:
 Piping & Quilting:
 {custom_pq if piping_quilt else "None"}
 
+Side Patch Design:
+{side_patch_prompt}
+
 Engineering Notes:
 {custom_instruction}
 
@@ -469,6 +486,12 @@ Rules:
 - Preserve OEM dimensions
 - Preserve OEM seat contouring
 - No unrealistic luxury modifications
+- No luxury SUV seats
+- No floating headrests
+- No adjustable rod headrests
+- No sedan seat geometry
+- No oversized bolsters
+- Maintain compact WagonR proportions
 - No floating cushions
 - No detached headrests
 - No AI distorted interiors
