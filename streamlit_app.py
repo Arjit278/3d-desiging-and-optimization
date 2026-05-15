@@ -366,8 +366,9 @@ with st.expander(
             "Side Patches",
             [
                 "None",
-                "Full Side Patch (White)",
-                "Only Cylindrical Central (White)",
+                "Full Side Patch silver",
+                "Only Cylindrical side patch silver",
+                "Head Rest patch silver",
                 "Custom"
             ]
         )
