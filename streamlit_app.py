@@ -427,28 +427,86 @@ if st.button("🚀 EXECUTE FULL SUITE"):
     
    if car == "Maruti Wagon R":
 
-       wagonr_rules = """
-    STRICTLY generate Maruti WagonR OEM seats.
-    
-    ABSOLUTE REQUIREMENTS:
-    - FIXED integrated headrest ONLY
-    - Headrest merged into seat
-    - NO detachable headrests
-    - NO adjustable rod headrests
-    - NO luxury SUV seats
-    - NO oversized bolsters
-    - Compact hatchback seat proportions
-    - Slim shoulder geometry
-    - Thin upright OEM seat profile
-    
-    IMPORTANT:
-    Seats must visually resemble
-    OEM WagonR front seats.
-    
-    Side shoulder patches must flow
-    from upper shoulder area downward.
-    
-    Use compact sporty hatchback styling.
+       
+        # --------------------------------------
+        # OEM VEHICLE RULES
+        # --------------------------------------
+        
+        wagonr_rules = ""
+        
+        if car == "Maruti Wagon R":
+        
+            wagonr_rules = """
+        STRICTLY generate Maruti WagonR OEM seats.
+        
+        ABSOLUTE REQUIREMENTS:
+        - FIXED integrated headrest ONLY
+        - Headrest merged into seat
+        - NO detachable headrests
+        - NO adjustable rod headrests
+        - NO luxury SUV seats
+        - NO oversized bolsters
+        - Compact hatchback seat proportions
+        - Slim shoulder geometry
+        - Thin upright OEM seat profile
+        
+        IMPORTANT:
+        Seats must visually resemble
+        OEM WagonR front seats.
+        
+        Side shoulder patches must flow
+        from upper shoulder area downward.
+        
+        Use compact sporty hatchback styling.
+        
+        Reference:
+        https://www.carwale.com/maruti-suzuki-cars/wagon-r/images/maruti-suzuki-wagon-r-front-row-seats-442349/?category=interior
+        """
+        
+        # --------------------------------------
+        # FINAL AI PROMPT
+        # --------------------------------------
+        
+        final_prompt = f"""
+        Professional automotive interior photography.
+        
+        STRICT OEM ACCURACY REQUIRED.
+        
+        Vehicle:
+        {car}
+        
+        {wagonr_rules}
+        
+        Stitching:
+        {pattern}
+        
+        Material:
+        {material}
+        
+        Color Theme:
+        {colors}
+        
+        Lighting:
+        {lighting}
+        
+        Market Tier:
+        {market}
+        
+        Engineering Instructions:
+        {custom_instruction}
+        
+        Rules:
+        - Maintain OEM seat geometry
+        - No floating cushions
+        - No detachable headrests
+        - No SUV seat proportions
+        - Maintain hatchback ergonomics
+        - Production-ready upholstery
+        - Hyper realistic leather texture
+        - 8K automotive photography
+        - Studio catalog rendering
+        """
+
     
     Reference:
     https://www.carwale.com/maruti-suzuki-cars/wagon-r/images/maruti-suzuki-wagon-r-front-row-seats-442349/?category=interior
