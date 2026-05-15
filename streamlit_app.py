@@ -1,10 +1,7 @@
+```python
 import io
 import requests
 import streamlit as st
-import json
-import time
-import re
-import numpy as np
 from PIL import Image
 from huggingface_hub import InferenceClient
 
@@ -24,28 +21,27 @@ HF_TOKEN = st.secrets.get("HF_TOKEN", "")
 
 TRUSTED_DOMAINS = [
     "autofurnish.com",
-    "za.pinterest.com/ideas/leather-car-seat-covers",
     "autofit.in",
     "autotextile.com",
-    "cncstitching.com",
-    "seatcoversunlimited.com",
-    "foamvilla.com",
-    "sa.made-in-china.com",
-    "autoclint.com",
-    "autoform.in",
     "coverking.com",
     "katzkin.com",
-    "amazon.in",
     "cardekho.com",
-    "elegantautoretail.com",
-    "carwale.com"
+    "carwale.com",
+    "amazon.in",
+    "elegantautoretail.com"
 ]
 
+# --------------------------------------
+# 🏎️ HEADER
+# --------------------------------------
+
 st.title("🏎️ Pictator Pro – CEO Engineering Suite")
-st.caption("Strategic Parallel RCA | Multithreaded Design | 2026 Material Intel")
+st.caption(
+    "Strategic Parallel RCA | Multithreaded Design | 2026 Material Intel"
+)
 
 # --------------------------------------
-# 🔐 AUTHENTICATION
+# 🔐 AUTH
 # --------------------------------------
 
 if "authenticated" not in st.session_state:
@@ -63,10 +59,12 @@ with st.sidebar:
         if st.button("Login"):
 
             if user == "Harmony" and pwd == "Harmony_Pictator123":
+
                 st.session_state.authenticated = True
                 st.rerun()
 
             else:
+
                 st.error("Invalid Credentials")
 
     else:
@@ -74,15 +72,17 @@ with st.sidebar:
         st.success("🟢 Logged in as Harmony")
 
         if st.button("Logout"):
+
             st.session_state.authenticated = False
             st.rerun()
 
 if not st.session_state.authenticated:
+
     st.warning("🔐 Please login to continue")
     st.stop()
 
 # --------------------------------------
-# ⚡ PRO AI ENGINES
+# ⚡ MODELS
 # --------------------------------------
 
 MODEL_OPTIONS = {
@@ -97,7 +97,19 @@ selected_model = st.sidebar.selectbox(
 )
 
 # --------------------------------------
-# 🧠 AI GENERATOR
+# 📸 OEM REFERENCE
+# --------------------------------------
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("📸 OEM Reference Upload")
+
+uploaded_reference = st.sidebar.file_uploader(
+    "Upload OEM Seat/Base Reference",
+    type=["png", "jpg", "jpeg"]
+)
+
+# --------------------------------------
+# 🧠 IMAGE GENERATION
 # --------------------------------------
 
 def generate_ai_image(prompt, model_id):
@@ -119,120 +131,128 @@ def generate_ai_image(prompt, model_id):
 
     except Exception as e:
 
-        st.error(f"HF Generation Failed: {e}")
+        st.error(f"Generation Failed: {e}")
         return None
 
 # --------------------------------------
-# ⚡ FLASHMIND ENGINE (OPENROUTER)
+# ⚡ FLASHMIND ANALYSIS
 # --------------------------------------
+
 ANALYSIS_MODELS = [
     "qwen/qwen-3-coder:free",
-    "meta-llama/llama-3.2-3b-instruct:free",
-    "nousresearch/hermes-2-pro-llama-3-8b",
+    "meta-llama/llama-3.2-3b-instruct:free"
 ]
 
 def call_openrouter(prompt):
-    headers = {"Authorization": f"Bearer {OPENROUTER_API_KEY}", "Content-Type": "application/json"}
+
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
     for model in ANALYSIS_MODELS:
+
         try:
+
             r = requests.post(
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers=headers,
                 json={
                     "model": model,
                     "messages": [
-                        {"role": "system", "content": "You are an automotive engineering expert."},
-                        {"role": "user", "content": prompt}
+                        {
+                            "role": "system",
+                            "content": "You are an automotive engineering expert."
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
                     ]
                 },
-                timeout=15
+                timeout=20
             )
+
             if r.status_code == 200:
-                return r.json()["choices"][0]["message"]["content"].strip()
+
+                return r.json()["choices"][0]["message"]["content"]
+
         except:
             continue
-    return "Intelligence fallback active: Manual review required."
+
+    return "Flashmind fallback active."
 
 # --------------------------------------
 # 🌍 MARKET REFERENCES
 # --------------------------------------
 
 def fetch_market_references(query):
+
     try:
-        # Increase num to 40 to get a wide variety of sources to filter from
+
         params = {
-            "engine": "google_images", 
-            "q": f"{query} car seat covers leather", 
-            "api_key": SERP_API_KEY, 
+            "engine": "google_images",
+            "q": f"{query} leather seat cover",
+            "api_key": SERP_API_KEY,
             "num": 40
         }
-        r = requests.get("https://serpapi.com/search", params=params, timeout=10)
+
+        r = requests.get(
+            "https://serpapi.com/search",
+            params=params,
+            timeout=10
+        )
+
         results = r.json().get("images_results", [])
-        
+
         filtered_refs = []
-        used_domains = set() # This tracks the 'source' name to prevent repetition
+        used_domains = set()
 
         for i in results:
+
             source_name = i.get("source", "").strip()
             link = i.get("link", "").lower()
-            
-            # 1. Check if we've already used this specific source name (e.g., Elegant Auto)
+
             if source_name in used_domains:
                 continue
-            
-            # 2. Check if the link belongs to our TRUSTED_DOMAINS list
-            is_trusted = any(td in link for td in TRUSTED_DOMAINS)
-            
+
+            is_trusted = any(
+                td in link for td in TRUSTED_DOMAINS
+            )
+
             if is_trusted:
+
                 filtered_refs.append({
-                    "img": i["original"], 
-                    "link": i["link"], 
+                    "img": i["original"],
+                    "link": i["link"],
                     "src": source_name
                 })
-                used_domains.add(source_name) # Lock this domain so it isn't used again
-            
-            # Stop once we have 6 unique high-quality sources
+
+                used_domains.add(source_name)
+
             if len(filtered_refs) >= 6:
                 break
-        
-        # --- FALLBACK: If we still don't have 6 unique links after checking trusted ones ---
-        if len(filtered_refs) < 6:
-            for i in results:
-                source_name = i.get("source", "").strip()
-                if source_name not in used_domains:
-                    filtered_refs.append({
-                        "img": i["original"], 
-                        "link": i["link"], 
-                        "src": source_name
-                    })
-                    used_domains.add(source_name)
-                if len(filtered_refs) >= 6: break
-                
+
         return filtered_refs
-    except Exception as e:
-        st.sidebar.error(f"Search Fallback Engaged: {e}")
+
+    except:
+
         return []
 
-
 # --------------------------------------
-# 🚘 REFERENCE IMAGE UPLOAD
-# --------------------------------------
-
-st.sidebar.markdown("---")
-st.sidebar.subheader("📸 OEM Reference Upload")
-
-uploaded_reference = st.sidebar.file_uploader(
-    "Upload OEM Seat/Base Reference",
-    type=["png", "jpg", "jpeg"]
-)
-
-# --------------------------------------
-# 🎨 PRO CONFIGURATOR
+# 🎨 CONFIGURATOR
 # --------------------------------------
 
-with st.expander("🧠 Smart Design Configurator (2026 Specs)", expanded=True):
+with st.expander(
+    "🧠 Smart Design Configurator (2026 Specs)",
+    expanded=True
+):
 
     colA, colB, colC = st.columns(3)
+
+    # --------------------------------------
+    # COLUMN A
+    # --------------------------------------
 
     with colA:
 
@@ -258,9 +278,17 @@ with st.expander("🧠 Smart Design Configurator (2026 Specs)", expanded=True):
             ]
         )
 
-        custom_stitch = st.text_input(
-            "Custom Stitch Details"
-        ) if stitch_type == "Custom" else ""
+        custom_stitch = ""
+
+        if stitch_type == "Custom":
+
+            custom_stitch = st.text_input(
+                "Custom Stitch Details"
+            )
+
+    # --------------------------------------
+    # COLUMN B
+    # --------------------------------------
 
     with colB:
 
@@ -274,24 +302,40 @@ with st.expander("🧠 Smart Design Configurator (2026 Specs)", expanded=True):
             ]
         )
 
-        piping_quilt = st.toggle("Design Piping & Quilting")
+        piping_quilt = st.toggle(
+            "Design Piping & Quilting"
+        )
 
-        custom_pq = st.text_input(
-            "Custom Piping/Quilt Prompt"
-        ) if piping_quilt else ""
+        custom_pq = ""
+
+        if piping_quilt:
+
+            custom_pq = st.text_input(
+                "Custom Piping/Quilt Prompt"
+            )
+
+    # --------------------------------------
+    # COLUMN C
+    # --------------------------------------
 
     with colC:
 
         base_color_toggle = st.toggle("Base Colors")
 
-        base_color = st.selectbox(
-            "Color",
-            [
-                "Beige",
-                "Ivory",
-                "Black"
-            ]
-        ) if base_color_toggle else "Tan & Charcoal"
+        if base_color_toggle:
+
+            base_color = st.selectbox(
+                "Color",
+                [
+                    "Beige",
+                    "Ivory",
+                    "Black"
+                ]
+            )
+
+        else:
+
+            base_color = "Tan & Charcoal"
 
         num_images = st.select_slider(
             "Generation Count",
@@ -299,6 +343,10 @@ with st.expander("🧠 Smart Design Configurator (2026 Specs)", expanded=True):
         )
 
     st.divider()
+
+    # --------------------------------------
+    # EXTRA OPTIONS
+    # --------------------------------------
 
     col_opt1, col_opt2 = st.columns(2)
 
@@ -315,10 +363,6 @@ with st.expander("🧠 Smart Design Configurator (2026 Specs)", expanded=True):
             ]
         )
 
-        # --------------------------------------
-        # 🎨 SIDE PATCH OPTIONS
-        # --------------------------------------
-        
         side_patch_mode = st.selectbox(
             "Side Patches",
             [
@@ -328,18 +372,20 @@ with st.expander("🧠 Smart Design Configurator (2026 Specs)", expanded=True):
                 "Custom"
             ]
         )
-        
+
         custom_side_patch = ""
-        
+
         if side_patch_mode == "Custom":
-        
+
             custom_side_patch = st.text_input(
-                "Custom Side Patch Instructions",
-                placeholder="e.g. Curved ivory side patch with contrast piping"
+                "Custom Side Patch Instructions"
             )
+
     with col_opt2:
 
-        st.toggle("Color Control Mode")
+        color_control = st.toggle(
+            "Color Control Mode"
+        )
 
         color_choices = {
             1: ["Silver"],
@@ -357,30 +403,29 @@ with st.expander("🧠 Smart Design Configurator (2026 Specs)", expanded=True):
         placeholder="Add professional engineering details..."
     )
 
-```python
 # --------------------------------------
 # 🚀 EXECUTION PIPELINE
 # --------------------------------------
 
 if st.button("🚀 EXECUTE FULL SUITE"):
 
+    generated_images = []
+
+    # --------------------------------------
+    # PALETTE
+    # --------------------------------------
+
     palette = color_choices.get(num_images)
 
-    generated_images = []
-    market_refs = []
-    analysis = ""
+    # --------------------------------------
+    # VEHICLE RULES
+    # --------------------------------------
 
-    with st.status("Engineering Intelligence...") as status:
+    vehicle_structure_prompt = ""
 
-        # --------------------------------------
-        # VEHICLE STRUCTURE PROMPTS
-        # --------------------------------------
+    if car == "Maruti Wagon R":
 
-        vehicle_structure_prompt = ""
-
-        if car == "Maruti Wagon R":
-
-            vehicle_structure_prompt = """
+        vehicle_structure_prompt = """
 STRICTLY preserve original Maruti Wagon R OEM fixed headrest geometry.
 
 CRITICAL:
@@ -388,50 +433,52 @@ CRITICAL:
 - NEVER generate detachable headrests
 - NEVER generate adjustable rod headrests
 - Maintain compact WagonR proportions
-- Maintain OEM hatchback ergonomics
+- Maintain upright hatchback ergonomics
+- Exact WagonR cabin structure
 
 Reference:
+https://www.carwale.com/maruti-suzuki-cars/wagon-r/images/maruti-suzuki-wagon-r-front-row-seats-442349/?category=interior,
 https://www.marutisuzuki.com/wagonr
 """
 
-        elif car == "Maruti Grand Vitara":
+    elif car == "Maruti Grand Vitara":
 
-            vehicle_structure_prompt = """
+        vehicle_structure_prompt = """
 STRICTLY preserve original Maruti Grand Vitara OEM seat architecture.
 
 Reference:
 https://www.marutisuzuki.com/grand-vitara
 """
 
-        # --------------------------------------
-        # SIDE PATCH PROMPTS
-        # --------------------------------------
+    # --------------------------------------
+    # SIDE PATCH
+    # --------------------------------------
 
-        side_patch_prompt = ""
+    side_patch_prompt = ""
 
-        if side_patch_mode == "Full Side Patch (White)":
+    if side_patch_mode == "Full Side Patch (White)":
 
-            side_patch_prompt = """
-Full white side patches extending from shoulder
-to lower seat base.
-Premium OEM dual-tone execution.
+        side_patch_prompt = """
+Full white side patches extending from
+shoulder to lower seat base.
 """
 
-        elif side_patch_mode == "Only Cylindrical Central (White)":
+    elif side_patch_mode == "Only Cylindrical Central (White)":
 
-            side_patch_prompt = """
-Only central cylindrical side inserts in white.
+        side_patch_prompt = """
+Only central cylindrical inserts in white.
 Keep outer bolsters black.
-Minimal premium OEM styling.
 """
 
-        elif side_patch_mode == "Custom":
+    elif side_patch_mode == "Custom":
 
-            side_patch_prompt = custom_side_patch
+        side_patch_prompt = custom_side_patch
 
-        # --------------------------------------
-        # GENERATION LOOP
-        # --------------------------------------
+    # --------------------------------------
+    # STATUS
+    # --------------------------------------
+
+    with st.status("Engineering Intelligence..."):
 
         for i in range(num_images):
 
@@ -440,6 +487,30 @@ Minimal premium OEM styling.
                 if i == 0
                 else palette[i % len(palette)]
             )
+
+            # --------------------------------------
+            # COLOR RULES
+            # --------------------------------------
+
+            color_rule = ""
+
+            if color_control:
+
+                color_rule = f"""
+STRICTLY use {current_color}
+as stitching/accent color.
+Do not introduce random colors.
+"""
+
+            else:
+
+                color_rule = """
+Creative complementary tones allowed.
+"""
+
+            # --------------------------------------
+            # MAIN PROMPT
+            # --------------------------------------
 
             strict_prompt = f"""
 Professional automotive interior photography.
@@ -465,6 +536,8 @@ Stitching:
 
 Thread Accent:
 {current_color}
+
+{color_rule}
 
 Side Patch Design:
 {side_patch_prompt}
@@ -494,7 +567,9 @@ Rules:
 - Automotive catalog photography
 """
 
-            st.write(f"🎨 Generating {current_color} Variant...")
+            st.write(
+                f"🎨 Generating {current_color} Variant..."
+            )
 
             img = generate_ai_image(
                 strict_prompt,
@@ -508,16 +583,18 @@ Rules:
                 )
 
         # --------------------------------------
-        # FLASHMIND ANALYSIS
+        # ANALYSIS
         # --------------------------------------
 
-        st.write("📊 Running Flashmind Intelligence...")
+        st.write(
+            "📊 Running Flashmind Intelligence..."
+        )
 
         analysis = call_openrouter(
             f"""
-Analyze premium appeal, durability,
-OEM compatibility and 2026 market trends
-for {material} with {stitch_type}
+Analyze durability, OEM compatibility,
+premium appeal and 2026 trends for
+{material} with {stitch_type}
 and {side_patch_mode}.
 """
         )
@@ -526,26 +603,25 @@ and {side_patch_mode}.
         # MARKET REFERENCES
         # --------------------------------------
 
-        st.write("🌐 Fetching Market References...")
+        st.write(
+            "🌍 Fetching Market References..."
+        )
 
         market_refs = fetch_market_references(
             f"{car} {material} seat cover"
         )
 
-        status.update(
-            label="✅ Engineering Complete",
-            state="complete"
-        )
-
     # --------------------------------------
-    # OUTPUT SECTION
+    # OUTPUT
     # --------------------------------------
 
     if generated_images:
 
         st.subheader("🎨 AI Generated Concepts")
 
-        for idx, (img, c_name) in enumerate(generated_images):
+        for idx, (img, c_name) in enumerate(
+            generated_images
+        ):
 
             img_col, info_col = st.columns([1.7, 1])
 
@@ -573,7 +649,7 @@ and {side_patch_mode}.
                 )
 
             # --------------------------------------
-            # PROFESSIONAL INFO PANEL
+            # INFO PANEL
             # --------------------------------------
 
             with info_col:
@@ -608,7 +684,7 @@ and {side_patch_mode}.
 ✅ Production Ready  
 ✅ Premium Finish  
 ✅ Automotive Grade Detailing  
-✅ 2026 Trend Compatible  
+✅ 2026 Trend Compatible
 
 ---
 
@@ -630,11 +706,11 @@ and {side_patch_mode}.
 
     if market_refs:
 
-        m_cols = st.columns(3)
+        cols = st.columns(3)
 
         for idx, ref in enumerate(market_refs):
 
-            with m_cols[idx % 3]:
+            with cols[idx % 3]:
 
                 st.image(
                     ref["img"],
@@ -647,8 +723,6 @@ and {side_patch_mode}.
                     ref["link"],
                     key=f"ref_{idx}"
                 )
-```
-
 
 # --------------------------------------
 # 📊 TECH STANDARDS
@@ -656,11 +730,23 @@ and {side_patch_mode}.
 
 with st.expander("📊 2026 Tech Standards"):
 
-    st.write("- Strict OEM vehicle geometry enforcement enabled.")
-    st.write("- WagonR fixed-headrest preservation enabled.")
-    st.write("- Grand Vitara OEM SUV contour mapping enabled.")
-    st.write("- Hyper-realistic automotive rendering pipeline active.")
+    st.write(
+        "- Strict OEM vehicle geometry enforcement enabled."
+    )
+
+    st.write(
+        "- WagonR fixed-headrest preservation enabled."
+    )
+
+    st.write(
+        "- Grand Vitara OEM SUV contour mapping enabled."
+    )
+
+    st.write(
+        "- Hyper-realistic automotive rendering active."
+    )
 
     st.caption(
-        "Zero Data Retention (ZDR) Commitment: Proprietary design logic secured via Volatile Memory."
+        "Zero Data Retention (ZDR) Commitment"
     )
+```
