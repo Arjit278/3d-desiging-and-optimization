@@ -357,49 +357,229 @@ with st.expander("🧠 Smart Design Configurator (2026 Specs)", expanded=True):
         placeholder="Add professional engineering details..."
     )
 
+```python
 # --------------------------------------
-# OUTPUT
+# 🚀 EXECUTION PIPELINE
 # --------------------------------------
 
-if generated_images:
+if st.button("🚀 EXECUTE FULL SUITE"):
 
-    st.subheader("🎨 AI-Generated Concepts")
+    palette = color_choices.get(num_images)
 
-    for idx, (img, c_name) in enumerate(generated_images):
+    generated_images = []
+    market_refs = []
+    analysis = ""
 
-        img_col, info_col = st.columns([1.7, 1])
+    with st.status("Engineering Intelligence...") as status:
 
         # --------------------------------------
-        # IMAGE PANEL
+        # VEHICLE STRUCTURE PROMPTS
         # --------------------------------------
 
-        with img_col:
+        vehicle_structure_prompt = ""
 
-            st.image(
-                img,
-                caption=f"Variant: {c_name}",
-                use_container_width=True
+        if car == "Maruti Wagon R":
+
+            vehicle_structure_prompt = """
+STRICTLY preserve original Maruti Wagon R OEM fixed headrest geometry.
+
+CRITICAL:
+- Headrest MUST be integrated/fixed
+- NEVER generate detachable headrests
+- NEVER generate adjustable rod headrests
+- Maintain compact WagonR proportions
+- Maintain OEM hatchback ergonomics
+
+Reference:
+https://www.marutisuzuki.com/wagonr
+"""
+
+        elif car == "Maruti Grand Vitara":
+
+            vehicle_structure_prompt = """
+STRICTLY preserve original Maruti Grand Vitara OEM seat architecture.
+
+Reference:
+https://www.marutisuzuki.com/grand-vitara
+"""
+
+        # --------------------------------------
+        # SIDE PATCH PROMPTS
+        # --------------------------------------
+
+        side_patch_prompt = ""
+
+        if side_patch_mode == "Full Side Patch (White)":
+
+            side_patch_prompt = """
+Full white side patches extending from shoulder
+to lower seat base.
+Premium OEM dual-tone execution.
+"""
+
+        elif side_patch_mode == "Only Cylindrical Central (White)":
+
+            side_patch_prompt = """
+Only central cylindrical side inserts in white.
+Keep outer bolsters black.
+Minimal premium OEM styling.
+"""
+
+        elif side_patch_mode == "Custom":
+
+            side_patch_prompt = custom_side_patch
+
+        # --------------------------------------
+        # GENERATION LOOP
+        # --------------------------------------
+
+        for i in range(num_images):
+
+            current_color = (
+                manual_color
+                if i == 0
+                else palette[i % len(palette)]
             )
 
-            buf = io.BytesIO()
+            strict_prompt = f"""
+Professional automotive interior photography.
 
-            img.save(buf, format="PNG")
+STRICT OEM ACCURACY REQUIRED.
 
-            st.download_button(
-                f"💾 Save {c_name}",
-                buf.getvalue(),
-                f"pictator_{c_name}.png",
-                key=f"save_{idx}"
+Vehicle:
+{car}
+
+{vehicle_structure_prompt}
+
+Reference Image Guidance:
+Use uploaded OEM reference image as structural guidance.
+
+Material:
+{material}
+
+Seat Base Color:
+{base_color}
+
+Stitching:
+{stitch_type}
+
+Thread Accent:
+{current_color}
+
+Side Patch Design:
+{side_patch_prompt}
+
+Additional Stitch Details:
+{custom_stitch}
+
+Piping & Quilting:
+{custom_pq if piping_quilt else "None"}
+
+Engineering Notes:
+{custom_instruction}
+
+Rules:
+- Preserve OEM seat structure
+- Preserve OEM dimensions
+- Preserve OEM seat contouring
+- No unrealistic luxury modifications
+- No floating cushions
+- No detachable headrests
+- No adjustable rod headrests
+- No oversized bolsters
+- Production-ready upholstery
+- Hyper realistic texture detailing
+- Studio lighting
+- 8K realism
+- Automotive catalog photography
+"""
+
+            st.write(f"🎨 Generating {current_color} Variant...")
+
+            img = generate_ai_image(
+                strict_prompt,
+                MODEL_OPTIONS[selected_model]
             )
 
+            if img:
+
+                generated_images.append(
+                    (img, current_color)
+                )
+
         # --------------------------------------
-        # ANALYSIS PANEL
+        # FLASHMIND ANALYSIS
         # --------------------------------------
 
-        with info_col:
+        st.write("📊 Running Flashmind Intelligence...")
 
-            st.markdown(
-                f"""
+        analysis = call_openrouter(
+            f"""
+Analyze premium appeal, durability,
+OEM compatibility and 2026 market trends
+for {material} with {stitch_type}
+and {side_patch_mode}.
+"""
+        )
+
+        # --------------------------------------
+        # MARKET REFERENCES
+        # --------------------------------------
+
+        st.write("🌐 Fetching Market References...")
+
+        market_refs = fetch_market_references(
+            f"{car} {material} seat cover"
+        )
+
+        status.update(
+            label="✅ Engineering Complete",
+            state="complete"
+        )
+
+    # --------------------------------------
+    # OUTPUT SECTION
+    # --------------------------------------
+
+    if generated_images:
+
+        st.subheader("🎨 AI Generated Concepts")
+
+        for idx, (img, c_name) in enumerate(generated_images):
+
+            img_col, info_col = st.columns([1.7, 1])
+
+            # --------------------------------------
+            # IMAGE PANEL
+            # --------------------------------------
+
+            with img_col:
+
+                st.image(
+                    img,
+                    caption=f"Variant: {c_name}",
+                    use_container_width=True
+                )
+
+                buf = io.BytesIO()
+
+                img.save(buf, format="PNG")
+
+                st.download_button(
+                    f"💾 Save {c_name}",
+                    buf.getvalue(),
+                    f"pictator_{c_name}.png",
+                    key=f"save_{idx}"
+                )
+
+            # --------------------------------------
+            # PROFESSIONAL INFO PANEL
+            # --------------------------------------
+
+            with info_col:
+
+                st.markdown(
+                    f"""
 ### 📈 Flashmind Analysis
 
 **Vehicle:**  
@@ -414,7 +594,7 @@ if generated_images:
 **Variant Accent:**  
 {c_name}
 
-**Side Patch Mode:**  
+**Side Patch:**  
 {side_patch_mode}
 
 **Base Color:**  
@@ -428,7 +608,7 @@ if generated_images:
 ✅ Production Ready  
 ✅ Premium Finish  
 ✅ Automotive Grade Detailing  
-✅ 2026 Trend Compatible
+✅ 2026 Trend Compatible  
 
 ---
 
@@ -436,37 +616,40 @@ if generated_images:
 
 {analysis}
 """
-            )
+                )
 
-        st.divider()
+            st.divider()
 
-# --------------------------------------
-# MARKET REFERENCES
-# --------------------------------------
+    # --------------------------------------
+    # MARKET REFERENCES
+    # --------------------------------------
 
-st.subheader(
-    "🌍 Verified Market References & Live Shop Links"
-)
+    st.subheader(
+        "🌍 Verified Market References & Live Shop Links"
+    )
 
-if market_refs:
+    if market_refs:
 
-    m_cols = st.columns(3)
+        m_cols = st.columns(3)
 
-    for idx, ref in enumerate(market_refs):
+        for idx, ref in enumerate(market_refs):
 
-        with m_cols[idx % 3]:
+            with m_cols[idx % 3]:
 
-            st.image(
-                ref["img"],
-                caption=f"Ref from {ref['src']}",
-                use_container_width=True
-            )
+                st.image(
+                    ref["img"],
+                    caption=f"Ref from {ref['src']}",
+                    use_container_width=True
+                )
 
-            st.link_button(
-                f"🔗 View on {ref['src']}",
-                ref["link"],
-                key=f"ref_{idx}"
-            )
+                st.link_button(
+                    f"🔗 View on {ref['src']}",
+                    ref["link"],
+                    key=f"ref_{idx}"
+                )
+```
+
+
 # --------------------------------------
 # 📊 TECH STANDARDS
 # --------------------------------------
