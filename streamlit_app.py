@@ -90,17 +90,10 @@ MODEL_OPTIONS = {
     "⚡ PaliGemma 2 3B": "google/paligemma2-3b-pt-448",
     "✨ Pixtral 12B": "mistralai/Pixtral-12B-2409",
     "🔥 GLM-4.1V 9B Thinking": "THUDM/glm-4-9b-chat",
-    "🏎️ Qwen2.5-VL 7B Instruct": "Qwen/Qwen2.5-VL-7B-Instruct"
-    # ⚡ Ultra-fast/Lightweight context & image editing (Under 1 second)
+    "🏎️ Qwen2.5-VL 7B Instruct": "Qwen/Qwen2.5-VL-7B-Instruct",
     "🏎️ FLUX.2 Klein": "black-forest-labs/FLUX.2-klein-9b-fp8", 
-    
-    # 🎨 The Gold Standard for Context-aware Image-to-Image editing
     "✨ FLUX.1 Kontext Dev": "black-forest-labs/FLUX.1-Kontext-dev",
-    
-    # 📐 Smart object insertion and canvas expanding (Inpainting/Outpainting)
     "🪟 FLUX.1 Fill Dev": "black-forest-labs/FLUX.1-Fill-dev",
-    
-    # 🤖 Complete image-style transfer based on a prompt
     "🌀 FLUX.1 Redux Dev": "black-forest-labs/FLUX.1-Redux-dev"
     
 }
@@ -154,8 +147,10 @@ def generate_ai_image(prompt, model_id):
 
 ANALYSIS_MODELS = [
     "qwen/qwen-3-coder:free",
-    "meta-llama/llama-3.2-3b-instruct:free"
+    "meta-llama/llama-3.2-3b-instruct:free",
+    "nousresearch/hermes-2-pro-llama-3-8b"
 ]
+
 
 def call_openrouter(prompt):
 
@@ -429,38 +424,79 @@ if st.button("🚀 EXECUTE FULL SUITE"):
 
     vehicle_structure_prompt = ""
 
-    if car == "Maruti Wagon R":
+    
+   if car == "Maruti Wagon R":
 
-        vehicle_structure_prompt = """
-STRICTLY preserve original Maruti Wagon R OEM seat geometry.
-
-ABSOLUTE REQUIREMENTS:
-- Fixed integrated headrest ONLY
-- Headrest merged with seat
-- NO detachable headrests
-- NO adjustable rod headrests
-- NO SUV seat styling
-- NO oversized bolsters
-- Maintain compact hatchback seat size
-- Maintain upright WagonR ergonomics
-- Maintain thin OEM seat profile
-- Maintain slim shoulder geometry
-
-IMPORTANT:
-Generate seats EXACTLY similar
-to OEM WagonR reference seats.
-
-Side shoulder patches must flow
-vertically from upper shoulders
-towards lower seat base.
-
-Use sporty OEM dual-tone styling.
-
-Reference:
-https://www.carwale.com/maruti-suzuki-cars/wagon-r/images/maruti-suzuki-wagon-r-front-row-seats-442349/?category=interior
-
-https://www.marutisuzuki.com/wagonr
-"""
+       wagonr_rules = """
+    STRICTLY generate Maruti WagonR OEM seats.
+    
+    ABSOLUTE REQUIREMENTS:
+    - FIXED integrated headrest ONLY
+    - Headrest merged into seat
+    - NO detachable headrests
+    - NO adjustable rod headrests
+    - NO luxury SUV seats
+    - NO oversized bolsters
+    - Compact hatchback seat proportions
+    - Slim shoulder geometry
+    - Thin upright OEM seat profile
+    
+    IMPORTANT:
+    Seats must visually resemble
+    OEM WagonR front seats.
+    
+    Side shoulder patches must flow
+    from upper shoulder area downward.
+    
+    Use compact sporty hatchback styling.
+    
+    Reference:
+    https://www.carwale.com/maruti-suzuki-cars/wagon-r/images/maruti-suzuki-wagon-r-front-row-seats-442349/?category=interior
+    """
+    
+    else:
+    
+        wagonr_rules = ""
+    
+    final_prompt = f"""
+    Professional automotive interior photography.
+    
+    STRICT OEM ACCURACY REQUIRED.
+    
+    Vehicle:
+    {car}
+    
+    {wagonr_rules}
+    
+    Stitching:
+    {pattern}
+    
+    Material:
+    {material}
+    
+    Color Theme:
+    {colors}
+    
+    Lighting:
+    {lighting}
+    
+    Market Tier:
+    {market}
+    
+    Engineering Instructions:
+    {custom_instruction}
+    
+    Rules:
+    - Maintain OEM seat geometry
+    - No floating cushions
+    - No detachable headrests
+    - No SUV seat proportions
+    - Maintain hatchback ergonomics
+    - Production-ready upholstery
+    - Hyper realistic leather texture
+    - 8K automotive photography
+    - Studio catalog rendering
+    """
 
     elif car == "Maruti Grand Vitara":
 
@@ -498,7 +534,7 @@ reference image style.
 Generate cylindrical side inserts
 in {pattern_color} color.
 
-Keep outer bolsters black.
+Keep the base color as centre.
 
 Maintain sporty OEM hatchback styling.
 """
@@ -633,47 +669,84 @@ Rules:
 
         analysis = call_openrouter(
             f"""
-You are Flashmind Automotive Intelligence 2026.
-
-Generate:
-- 5 to 7 concise bullet points
-- followed by 1 premium market summary
-
-Focus on:
-- 2026 upholstery trends
-- sporty hatchback interiors
-- premium dual-tone styling
-- integrated headrest trends
-- luxury stitching trends
-- ergonomic contour trends
-- premium side patch styling
-- Indian aftermarket trends
-- sporty OEM aesthetics
-
-Vehicle:
-{car}
-
-Material:
-{material}
-
-Stitching:
-{stitch_type}
-
-Patch Style:
-{side_patch_mode}
-
-Pattern Target:
-{pattern_target}
-
-Color:
-{pattern_color}
-
-Rules:
-- professional tone
-- concise bullets
-- premium automotive language
-"""
+        You are Flashmind Automotive Intelligence 2026.
+        
+        Generate:
+        - 5 to 6 concise bullet points
+        - followed by a short premium market summary
+        
+        Focus on:
+        - 2026 upholstery trends
+        - sporty hatchback interiors
+        - integrated headrest trends
+        - dual-tone side patch trends
+        - luxury stitching trends
+        - OEM upgrade demand
+        - ergonomic seat contouring
+        - Indian aftermarket trends
+        
+        Vehicle:
+        {car}
+        
+        Material:
+        {material}
+        
+        Pattern:
+        {pattern}
+        
+        Colorway:
+        {colors}
+        
+        Rules:
+        - concise bullets
+        - premium automotive tone
+        - no generic AI wording
+        """
         )
+
+        
+        genz_trends = call_openrouter(
+            f"""
+        You are Flashmind GenZ Automotive Trend Intelligence 2026.
+        
+        Generate:
+        - 8 to 10 premium trend bullet points
+        - include trend names
+        - include modern buyer preferences
+        - include GenZ customization demand
+        - include sporty upholstery trends
+        - include premium hatchback modifications
+        - include luxury stitching trends
+        - include seat contour trends
+        - include side patch trends
+        - include ambient cabin styling trends
+        - include compact sporty OEM upgrade trends
+        
+        Vehicle:
+        {car}
+        
+        Material:
+        {material}
+        
+        Pattern:
+        {pattern}
+        
+        Colorway:
+        {colors}
+        
+        Output format:
+        - professional bullets
+        - premium automotive language
+        - NO paragraphs
+        - concise but insightful
+        - include small web/article references when relevant
+        
+        Example:
+        • Floating contrast side patches trending in GenZ hatchbacks (AutoForm 2026)
+        """
+        )
+
+
 
         st.write(
             "🌍 Fetching Market References..."
@@ -784,6 +857,75 @@ Rules:
                     ref["link"],
                     key=f"ref_{idx}"
                 )
+
+
+                st.divider()
+                
+                st.subheader("📈 Flashmind 2026 Trend Intelligence")
+                
+                st.markdown(
+                    f"""
+                ### 🚘 Vehicle
+                {car}
+                
+                ### 🧵 Material
+                {material}
+                
+                ### ✨ Stitching
+                {pattern}
+                
+                ### 🎨 Colorway
+                {colors}
+                
+                ---
+                
+                ### 🔥 Market + Upholstery Trends
+                
+                {analysis}
+                
+                ---
+                
+                ### 🧠 OEM Intelligence
+                
+                ✅ Fixed Headrest Enforcement Active  
+                ✅ Hatchback Seat Mapping Enabled  
+                ✅ Premium Side Patch Styling Active  
+                ✅ 2026 Trend Optimization Enabled  
+                ✅ OEM Geometry Preservation Active  
+                """
+                )
+
+st.divider()
+
+st.subheader("🔥 GenZ Upholstery & Market Intelligence 2026")
+
+st.markdown(
+    f"""
+### 🚘 Vehicle Segment
+{car}
+
+### 🎨 Current Customization Direction
+{pattern} • {colors} • {material}
+
+---
+
+### 📈 GenZ Buyer Preferences & Trends
+
+{genz_trends}
+
+---
+
+### 🌐 Premium Market Signals
+
+• OEM+ sporty interiors dominating premium hatchback upgrades  
+• Integrated headrest seat demand increasing in urban GenZ buyers  
+• Dual-tone side patch styling trending in aftermarket customization  
+• Ambient stitching + contrast piping rapidly growing in Tier-1 cities  
+• Compact sporty seat ergonomics outperform bulky luxury seats  
+"""
+)
+
+
 
 # --------------------------------------
 # 📊 TECH STANDARDS
