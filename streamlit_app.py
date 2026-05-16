@@ -21,6 +21,7 @@ st.set_page_config(
 )
 
 OPENROUTER_API_KEY = st.secrets.get("OPENROUTER_API_KEY", "")
+SERP_API_KEY = st.secrets.get("SERP_API_KEY", "")
 HF_TOKEN = st.secrets.get("HF_TOKEN", "")
 
 # --------------------------------------
@@ -558,7 +559,9 @@ if st.button("🚀 EXECUTE FULL SUITE"):
             {', '.join(trend_focus)}
             """
         )
-
+        
+    st.write("📊 Analyzing Material Trends...")
+        analysis = call_openrouter(f"Briefly analyze durability and 2026 trends for {material} with {pattern} stitching.")
     # --------------------------------------
     # 🎨 GENERATION LOOP
     # --------------------------------------
