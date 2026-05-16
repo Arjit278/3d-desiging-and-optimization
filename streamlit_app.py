@@ -80,8 +80,8 @@ if not st.session_state.authenticated:
 MODEL_OPTIONS = {
     "⚡ FLUX.1 Schnell": "black-forest-labs/FLUX.1-schnell",
     "🔥 FLUX.1 Dev": "black-forest-labs/FLUX.1-dev",
-    "⚡ SDXL Lightning": "ByteDance/SDXL-Lightning",
-    "✨ SDXL Base": "stabilityai/stable-diffusion-xl-base-1.0",
+    "⚡ SDXL Medium": "stabilityai/stable-diffusion-3.5-medium",
+    "✨ Pixart Sigma": "PixArt-alpha/PixArt-Sigma-XL-2-1024-MS",
     "🪟 FLUX Fill Dev": "black-forest-labs/FLUX.1-Fill-dev"
 }
 
