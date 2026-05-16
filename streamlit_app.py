@@ -774,8 +774,7 @@ if st.button("🚀 EXECUTE FULL SUITE"):
     - maintain OEM realism 
     - maintain hatchback proportions 
     - maintain SUV proportions 
-    """
-
+   
     Rules:
     - hyper realistic upholstery
     - premium piping
