@@ -80,7 +80,7 @@ if not st.session_state.authenticated:
 MODEL_OPTIONS = {
     "⚡ FLUX.1 Schnell": "black-forest-labs/FLUX.1-schnell",
     "🔥 FLUX.1 Dev": "black-forest-labs/FLUX.1-dev",
-    "⚡ FLUX.2 Dev": "black-forest-labs/FLUX.2-dev",
+    "⚡ DALL": "snwy/SD1.5-DALLE-2",
     "✨ FLUX.2-klein-4B": "black-forest-labs/FLUX.2-klein-4B",
     "🔥 Qwen-Image-Edit-2511-Lightning": "lightx2v/Qwen-Image-Edit-2511-Lightning",
     "🏎️ Z-Image-Turbo": "unsloth/Z-Image-Turbo-GGUF",
