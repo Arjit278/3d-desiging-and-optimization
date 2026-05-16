@@ -83,7 +83,7 @@ MODEL_OPTIONS = {
     "⚡ FLUX.2 Dev": "black-forest-labs/FLUX.2-dev",
     "✨ FLUX.2-klein-4B": "black-forest-labs/FLUX.2-klein-4B",
     "🔥 Qwen-Image-Edit-2511-Lightning": "lightx2v/Qwen-Image-Edit-2511-Lightning",
-    "🏎️ Z-Image-Turbo": "Tongyi-MAI/Z-Image-Turbo",
+    "🏎️ Z-Image-Turbo": "unsloth/Z-Image-Turbo-GGUF",
     "✨ SDXL Base": "stabilityai/stable-diffusion-xl-base-1.0",
     "🪟 FLUX Fill Dev": "black-forest-labs/FLUX.1-Fill-dev"
 }
