@@ -1,10 +1,14 @@
+# =========================================================
+# PICTATOR PRO 2026 — ULTIMATE FLASHMIND EDITION
+# =========================================================
+
 import io
 import requests
 import streamlit as st
 from huggingface_hub import InferenceClient
 
 # =========================================================
-# PICTATOR PRO 2026 — FINAL INTEGRATED VERSION
+# PAGE CONFIG
 # =========================================================
 
 st.set_page_config(
@@ -15,9 +19,34 @@ st.set_page_config(
 
 HF_TOKEN = st.secrets.get("HF_TOKEN", "")
 OPENROUTER_API_KEY = st.secrets.get("OPENROUTER_API_KEY", "")
+SERP_API_KEY = st.secrets.get("SERP_API_KEY", "")
 
 # =========================================================
-# SAFE WORKING MODELS
+# FLASHMIND MODELS
+# =========================================================
+
+ANALYSIS_MODELS = [
+    "qwen/qwen-3-coder:free",
+    "meta-llama/llama-3.2-3b-instruct:free",
+    "nousresearch/hermes-2-pro-llama-3-8b"
+]
+
+# =========================================================
+# TRUSTED DOMAINS
+# =========================================================
+
+TRUSTED_DOMAINS = [
+    "autofurnish.com",
+    "autofit.in",
+    "coverking.com",
+    "katzkin.com",
+    "cardekho.com",
+    "carwale.com",
+    "amazon.in"
+]
+
+# =========================================================
+# MODELS
 # =========================================================
 
 MODEL_OPTIONS = {
@@ -32,7 +61,7 @@ MODEL_OPTIONS = {
 # =========================================================
 
 st.title("🏎️ Pictator Pro – CEO Engineering Suite")
-st.caption("Advanced OEM Seat Intelligence + 2026 Trend Engineering")
+st.caption("Advanced OEM Seat Intelligence + Flashmind Trend Engineering")
 
 # =========================================================
 # SIDEBAR
@@ -106,6 +135,70 @@ with col3:
     )
 
 # =========================================================
+# THREAD / PIPING
+# =========================================================
+
+st.markdown("### 🧵 Piping / Threading / Custom Tuning")
+
+thread_cols = st.columns(4)
+
+with thread_cols[0]:
+
+    piping_toggle = st.toggle(
+        "Piping",
+        value=True
+    )
+
+with thread_cols[1]:
+
+    threading_toggle = st.toggle(
+        "Threading",
+        value=True
+    )
+
+with thread_cols[2]:
+
+    custom_color_toggle = st.toggle(
+        "Custom Color Tune",
+        value=True
+    )
+
+with thread_cols[3]:
+
+    sporty_finish_toggle = st.toggle(
+        "Sport Finish"
+    )
+
+thread_colors = st.multiselect(
+    "Thread / Piping Colors",
+    [
+        "Red",
+        "Silver",
+        "Gold",
+        "Blue",
+        "Peach",
+        "Sky Blue",
+        "Black",
+        "White",
+        "Cream",
+        "Orange",
+        "Magenta"
+    ],
+    default=["Red", "Silver"]
+)
+
+thread_pattern = st.selectbox(
+    "Thread Pattern",
+    [
+        "Contrast OEM",
+        "Luxury Flow",
+        "GT Sport",
+        "Diamond Highlight",
+        "Premium Executive"
+    ]
+)
+
+# =========================================================
 # SEAT TOGGLES
 # =========================================================
 
@@ -141,33 +234,27 @@ if four_seat_toggle:
     seat_mode = "Full 4 Seat Set"
 
 # =========================================================
-# VEHICLE HEADREST LOCKS
+# HEADREST LOGIC
 # =========================================================
 
-vehicle_cols = st.columns(2)
+if car == "Maruti Wagon R":
 
-with vehicle_cols[0]:
+    st.toggle(
+        "🔒 WagonR Fixed Headrest",
+        value=True,
+        disabled=True
+    )
 
-    if car == "Maruti Wagon R":
+else:
 
-        st.toggle(
-            "🔒 WagonR Fixed Headrest",
-            value=True,
-            disabled=True
-        )
-
-with vehicle_cols[1]:
-
-    if car == "Maruti Grand Vitara":
-
-        st.toggle(
-            "🏔️ Grand Vitara SUV Seats",
-            value=True,
-            disabled=True
-        )
+    st.toggle(
+        "🏔️ Grand Vitara SUV Seats",
+        value=True,
+        disabled=True
+    )
 
 # =========================================================
-# PATCH TOGGLES
+# PATCH ENGINEERING
 # =========================================================
 
 st.markdown("## 🎨 Side Patch Engineering")
@@ -214,7 +301,7 @@ patch_colors = st.multiselect(
         "Orange",
         "Gold"
     ],
-    default=["Silver", "Sky Blue"]
+    default=["Silver"]
 )
 
 patch_style = st.selectbox(
@@ -232,69 +319,123 @@ patch_style = st.selectbox(
 patch_texture = st.selectbox(
     "Patch Texture",
     [
-        "Alcantara Style",
         "Smooth Leather",
-        "Carbon Texture"
+        "Carbon Texture",
+        "Alcantara Style"
     ]
 )
 
 # =========================================================
-# OPENROUTER ANALYSIS
+# FLASHMIND BOX
 # =========================================================
 
-st.markdown("## 📈 OpenRouter Trend Intelligence")
+st.markdown("## 📈 Flashmind Trend Intelligence")
 
 trend_toggle = st.toggle(
-    "Enable Trend Analysis",
+    "Enable Flashmind Analysis",
     value=True
 )
 
 engineering_notes = st.text_area(
     "✍️ Engineering Instructions",
     value="Share good designs as per above settings with fixed seat head rests",
-    height=120
+    height=140
 )
 
 # =========================================================
-# OPENROUTER FUNCTION
+# OPENROUTER
 # =========================================================
 
 def call_openrouter(prompt):
 
-    if not OPENROUTER_API_KEY:
-        return "Missing OPENROUTER_API_KEY"
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    for model in ANALYSIS_MODELS:
+
+        try:
+
+            response = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers=headers,
+                json={
+                    "model": model,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You are an automotive upholstery market intelligence expert."
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ]
+                },
+                timeout=20
+            )
+
+            if response.status_code == 200:
+
+                data = response.json()
+
+                return data["choices"][0]["message"]["content"]
+
+        except:
+            continue
+
+    return "Flashmind fallback active."
+
+# =========================================================
+# SERP MARKET REFERENCES
+# =========================================================
+
+def fetch_market_references(query):
 
     try:
 
-        response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": "meta-llama/llama-3.2-3b-instruct",
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ]
-            },
-            timeout=30
+        params = {
+            "engine": "google_images",
+            "q": f"{query} leather seat cover",
+            "api_key": SERP_API_KEY,
+            "num": 20
+        }
+
+        response = requests.get(
+            "https://serpapi.com/search",
+            params=params,
+            timeout=15
         )
 
-        if response.status_code == 200:
+        data = response.json()
 
-            data = response.json()
+        results = data.get("images_results", [])
 
-            return data["choices"][0]["message"]["content"]
+        final_refs = []
 
-        return f"OpenRouter Error: {response.status_code}"
+        for item in results:
+
+            link = item.get("link", "").lower()
+
+            if any(td in link for td in TRUSTED_DOMAINS):
+
+                final_refs.append({
+                    "img": item["original"],
+                    "link": item["link"],
+                    "src": item.get("source", "Market")
+                })
+
+            if len(final_refs) >= 6:
+                break
+
+        return final_refs
 
     except Exception as e:
 
-        return str(e)
+        st.error(f"SERP Error: {e}")
+
+        return []
 
 # =========================================================
 # IMAGE GENERATION
@@ -320,6 +461,7 @@ def generate_image(prompt, model_id):
     except Exception as e:
 
         st.error(f"Generation Failed: {e}")
+
         return None
 
 # =========================================================
@@ -343,7 +485,41 @@ if st.button("🚀 EXECUTE FULL SUITE"):
         active_patches.append("Headrest Patch")
 
     # =====================================================
-    # VEHICLE PROMPT LOGIC
+    # THREAD ENGINE
+    # =====================================================
+
+    thread_prompt = ""
+
+    if piping_toggle:
+
+        thread_prompt += f"""
+        Premium piping enabled.
+        Piping Colors:
+        {", ".join(thread_colors)}
+        """
+
+    if threading_toggle:
+
+        thread_prompt += f"""
+        Decorative threading enabled.
+        Thread Pattern:
+        {thread_pattern}
+        """
+
+    if custom_color_toggle:
+
+        thread_prompt += """
+        Custom dual-tone color tuning enabled.
+        """
+
+    if sporty_finish_toggle:
+
+        thread_prompt += """
+        Sport finish styling enabled.
+        """
+
+    # =====================================================
+    # SEAT LOGIC
     # =====================================================
 
     if car == "Maruti Wagon R":
@@ -351,7 +527,8 @@ if st.button("🚀 EXECUTE FULL SUITE"):
         if seat_mode == "Single Front Seat":
 
             seat_prompt = """
-            Generate ONE OEM WagonR front seat.
+            STRICT WagonR single seat generation.
+            ONLY ONE seat.
             Fixed integrated headrest mandatory.
             Compact hatchback geometry.
             """
@@ -359,17 +536,17 @@ if st.button("🚀 EXECUTE FULL SUITE"):
         elif seat_mode == "Dual Front Seats":
 
             seat_prompt = """
-            Generate TWO WagonR front seats.
+            STRICT WagonR dual seat generation.
+            ONLY TWO seats.
             Fixed integrated headrests mandatory.
-            Compact hatchback layout.
             """
 
         else:
 
             seat_prompt = """
-            Generate FULL 4-seat WagonR layout.
+            STRICT WagonR 4-seat layout.
             Front seats fixed integrated headrests.
-            Compact realistic WagonR cabin spacing.
+            Rear compact hatchback bench.
             """
 
     else:
@@ -377,26 +554,30 @@ if st.button("🚀 EXECUTE FULL SUITE"):
         if seat_mode == "Single Front Seat":
 
             seat_prompt = """
-            Generate ONE premium Grand Vitara SUV front seat.
+            STRICT Grand Vitara SUV single seat.
+            Premium SUV seat geometry.
             Integrated SUV headrest.
-            Wide premium contours.
             """
 
         elif seat_mode == "Dual Front Seats":
 
             seat_prompt = """
-            Generate TWO premium Grand Vitara front seats.
+            STRICT Grand Vitara dual seat generation.
+            Premium SUV contours.
             Integrated SUV headrests.
-            Premium SUV geometry.
             """
 
         else:
 
             seat_prompt = """
-            Generate FULL Grand Vitara SUV seat layout.
-            Premium front and rear seats.
+            STRICT Grand Vitara full seat layout.
+            Premium SUV front & rear seats.
             Integrated SUV headrests.
             """
+
+    # =====================================================
+    # FINAL PROMPT
+    # =====================================================
 
     final_prompt = f"""
     Professional automotive seat cover design.
@@ -430,15 +611,21 @@ if st.button("🚀 EXECUTE FULL SUITE"):
     Active Patches:
     {", ".join(active_patches)}
 
+    Thread / Piping:
+    {thread_prompt}
+
     Instructions:
     {engineering_notes}
 
     Rules:
-    - realistic OEM geometry
-    - integrated headrests
-    - sporty hatchback realism
-    - premium SUV realism
-    - hyper realistic texture
+    - hyper realistic upholstery
+    - premium piping
+    - premium threading
+    - OEM seat geometry
+    - no floating cushions
+    - no detachable headrests
+    - realistic hatchback ergonomics
+    - realistic SUV ergonomics
     - automotive studio lighting
     - 8k rendering
     """
@@ -485,16 +672,16 @@ if st.button("🚀 EXECUTE FULL SUITE"):
             )
 
     # =====================================================
-    # TREND ANALYSIS
+    # FLASHMIND ANALYSIS
     # =====================================================
 
     if trend_toggle:
 
-        st.write("📊 Running OpenRouter Trend Analysis...")
+        st.write("📊 Running Flashmind Analysis...")
 
         trend_result = call_openrouter(
             f"""
-            Generate concise bullet points for:
+            Analyze latest 2026 automotive upholstery trends.
 
             Vehicle:
             {car}
@@ -511,22 +698,66 @@ if st.button("🚀 EXECUTE FULL SUITE"):
             Patch Style:
             {patch_style}
 
-            Focus:
-            - GenZ upholstery trends
-            - sporty hatchback interiors
-            - integrated headrest styling
-            - OEM+ modifications
-            - premium side patch trends
+            Patch Texture:
+            {patch_texture}
+
+            Patch Colors:
+            {", ".join(patch_colors)}
+
+            Thread Colors:
+            {", ".join(thread_colors)}
+
+            Engineering Notes:
+            {engineering_notes}
+
+            Generate:
+            - concise bullet points
+            - latest market trends
+            - GenZ trends
+            - luxury trends
+            - sporty hatchback trends
+            - premium SUV trends
+            - recommended color combinations
+            - premium piping recommendations
             """
         )
 
-        st.subheader("📈 2026 Upholstery Trend Intelligence")
+        st.subheader("📈 Flashmind Market Intelligence")
 
         st.text_area(
-            "Trend Analysis",
+            "Flashmind Analysis",
             value=trend_result,
-            height=300
+            height=320
         )
+
+    # =====================================================
+    # MARKET REFERENCES
+    # =====================================================
+
+    market_refs = fetch_market_references(
+        f"{car} {material} seat cover"
+    )
+
+    st.subheader("🌍 Live Market Trends & Web References")
+
+    if market_refs:
+
+        ref_cols = st.columns(3)
+
+        for idx, ref in enumerate(market_refs):
+
+            with ref_cols[idx % 3]:
+
+                st.image(
+                    ref["img"],
+                    caption=f"Trend: {ref['src']}",
+                    use_container_width=True
+                )
+
+                st.link_button(
+                    f"🔗 Open {ref['src']}",
+                    ref["link"]
+                )
 
 # =========================================================
 # TECH STANDARDS
@@ -537,6 +768,6 @@ with st.expander("📊 2026 Tech Standards"):
     st.write("- WagonR fixed headrest logic enabled.")
     st.write("- Grand Vitara SUV seat logic enabled.")
     st.write("- Single / Double / 4-seat generation enabled.")
-    st.write("- Horizontal patch toggles enabled.")
-    st.write("- OpenRouter trend analysis enabled.")
-    st.write("- OEM geometry preservation enabled.")
+    st.write("- Threading & piping intelligence enabled.")
+    st.write("- Flashmind trend analysis enabled.")
+    st.write("- SERP market references enabled.")
