@@ -134,6 +134,149 @@ with col3:
         options=[1, 3, 5]
     )
 
+    # =========================================================
+    # 🎨 COLOR CONTROL + REFERENCE FEED
+    # =========================================================
+    
+    color_control_mode = st.toggle(
+        "Color Control Mode",
+        value=True
+    )
+    
+    color_choices = {
+        1: ["Silver"],
+        3: ["Silver", "Blue", "Red"],
+        5: ["Silver", "Orange", "Blue", "Red", "Gold"]
+    }
+    
+    manual_color = st.selectbox(
+        "Select Palette",
+        color_choices.get(num_images)
+    )
+    
+    # =========================================================
+    # 🌍 URL / IMAGE FEED ENGINE
+    # =========================================================
+    
+    reference_mode = st.toggle(
+        "Reference Feed Mode",
+        value=True
+    )
+    
+    reference_url = ""
+    
+    if reference_mode:
+    
+        reference_url = st.text_input(
+            "Paste OEM / Market Reference URL",
+            placeholder="https://..."
+        )
+    
+        st.caption(
+            "Supports marketplace links, OEM photos, Pinterest, Google Images etc."
+        )
+    
+    # =========================================================
+    # 🪑 STRICT SEAT LOCK ENGINE
+    # =========================================================
+    
+    seat_mode = "Single Front Seat"
+    
+    if (
+        single_seat_toggle
+        and not double_seat_toggle
+        and not four_seat_toggle
+    ):
+    
+        seat_mode = "Single Front Seat"
+    
+    elif (
+        double_seat_toggle
+        and not four_seat_toggle
+    ):
+    
+        seat_mode = "Dual Front Seats"
+    
+    elif four_seat_toggle:
+    
+        seat_mode = "Full 4 Seat Set"
+    
+    # =========================================================
+    # 🔒 WAGONR HARD LOCK
+    # =========================================================
+    
+    wagonr_fixed_prompt = ""
+    
+    if car == "Maruti Wagon R":
+    
+        wagonr_fixed_prompt = """
+        STRICT ENFORCEMENT:
+        - WagonR compact hatchback geometry
+        - fixed integrated headrest mandatory
+        - prohibit detachable headrests
+        - prohibit luxury sofa geometry
+        - compact upright OEM seating
+        """
+    
+        if seat_mode == "Single Front Seat":
+    
+            wagonr_fixed_prompt += """
+            Generate ONLY ONE front seat.
+            """
+    
+        elif seat_mode == "Dual Front Seats":
+    
+            wagonr_fixed_prompt += """
+            Generate ONLY TWO front seats.
+            """
+    
+        elif seat_mode == "Full 4 Seat Set":
+    
+            wagonr_fixed_prompt += """
+            Generate COMPLETE 4-seat WagonR layout.
+            """
+    
+    # =========================================================
+    # 🏔️ GRAND VITARA LOCK
+    # =========================================================
+    
+    grand_vitara_prompt = ""
+    
+    if car == "Maruti Grand Vitara":
+    
+        grand_vitara_prompt = """
+        STRICT ENFORCEMENT:
+        - premium SUV seat geometry
+        - integrated SUV headrests
+        - wider premium shoulder contours
+        - realistic Grand Vitara spacing
+        """
+    
+    # =========================================================
+    # 🎨 ADD INSIDE FINAL PROMPT
+    # =========================================================
+    
+    final_prompt += f"""
+    
+    Selected Palette:
+    {manual_color}
+    
+    Reference URL:
+    {reference_url}
+    
+    Vehicle Lock:
+    {wagonr_fixed_prompt}
+    {grand_vitara_prompt}
+    
+    Critical Rules:
+    - obey exact seat count
+    - obey exact vehicle geometry
+    - maintain OEM realism
+    - maintain hatchback proportions
+    - maintain SUV proportions
+    """
+
+
 # =========================================================
 # THREAD / PIPING
 # =========================================================
@@ -616,6 +759,22 @@ if st.button("🚀 EXECUTE FULL SUITE"):
 
     Instructions:
     {engineering_notes}
+
+    Selected Palette: {manual_color} 
+    
+    Reference URL: {reference_url} 
+    
+    Vehicle Lock: 
+    {wagonr_fixed_prompt} 
+    {grand_vitara_prompt} 
+    
+    Critical Rules: 
+    - obey exact seat count 
+    - obey exact vehicle geometry 
+    - maintain OEM realism 
+    - maintain hatchback proportions 
+    - maintain SUV proportions 
+    """
 
     Rules:
     - hyper realistic upholstery
