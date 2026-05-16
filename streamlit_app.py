@@ -98,7 +98,7 @@ MODEL_OPTIONS = {
     "🏎️ Z-Image-Turbo": "Tongyi-MAI/Z-Image-Turbo",
     "✨ Stable-diffusion-xl-base-1.0": "stabilityai/stable-diffusion-xl-base-1.0",
     "🪟 FLUX.1 Fill Dev": "black-forest-labs/FLUX.1-Fill-dev",
-    "🌀 Stable-diffusion-v1-5"": "sd-legacy/stable-diffusion-v1-5",
+    "🌀 Stable-diffusion-v1-5": "sd-legacy/stable-diffusion-v1-5"
 }
 
 selected_model = st.sidebar.selectbox(
