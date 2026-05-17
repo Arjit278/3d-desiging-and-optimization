@@ -182,25 +182,6 @@ with col3:
     
     seat_mode = "Single Front Seat"
     
-    if (
-        single_seat_toggle
-        and not double_seat_toggle
-        and not four_seat_toggle
-    ):
-    
-        seat_mode = "Single Front Seat"
-    
-    elif (
-        double_seat_toggle
-        and not four_seat_toggle
-    ):
-    
-        seat_mode = "Dual Front Seats"
-    
-    elif four_seat_toggle:
-    
-        seat_mode = "Full 4 Seat Set"
-    
     # =========================================================
     # 🔒 WAGONR HARD LOCK
     # =========================================================
@@ -256,25 +237,6 @@ with col3:
     # 🎨 ADD INSIDE FINAL PROMPT
     # =========================================================
     
-    final_prompt += f"""
-    
-    Selected Palette:
-    {manual_color}
-    
-    Reference URL:
-    {reference_url}
-    
-    Vehicle Lock:
-    {wagonr_fixed_prompt}
-    {grand_vitara_prompt}
-    
-    Critical Rules:
-    - obey exact seat count
-    - obey exact vehicle geometry
-    - maintain OEM realism
-    - maintain hatchback proportions
-    - maintain SUV proportions
-    """
 
 
 # =========================================================
@@ -375,6 +337,56 @@ if double_seat_toggle:
 
 if four_seat_toggle:
     seat_mode = "Full 4 Seat Set"
+
+# =========================================================
+# VEHICLE LOCK PROMPTS
+# =========================================================
+
+wagonr_fixed_prompt = ""
+grand_vitara_prompt = ""
+
+if car == "Maruti Wagon R":
+
+    wagonr_fixed_prompt = """
+    STRICT ENFORCEMENT:
+    - WagonR compact hatchback geometry
+    - fixed integrated headrest mandatory
+    - fixed headrest must be built into the seat back
+    - prohibit detachable headrests
+    - prohibit luxury sofa geometry
+    - compact upright OEM seating
+    """
+
+    if seat_mode == "Single Front Seat":
+
+        wagonr_fixed_prompt += """
+        Generate a single-seat image.
+        Generate ONLY ONE WagonR front seat.
+        """
+
+    elif seat_mode == "Dual Front Seats":
+
+        wagonr_fixed_prompt += """
+        Generate a double-front-seat image.
+        Generate ONLY TWO WagonR front seats.
+        """
+
+    elif seat_mode == "Full 4 Seat Set":
+
+        wagonr_fixed_prompt += """
+        Generate one full 4-seat WagonR image.
+        Generate the complete front-and-rear WagonR seat set.
+        """
+
+if car == "Maruti Grand Vitara":
+
+    grand_vitara_prompt = """
+    STRICT ENFORCEMENT:
+    - premium SUV seat geometry
+    - integrated SUV headrests
+    - wider premium shoulder contours
+    - realistic Grand Vitara spacing
+    """
 
 # =========================================================
 # HEADREST LOGIC
