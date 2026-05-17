@@ -50,10 +50,22 @@ TRUSTED_DOMAINS = [
 # =========================================================
 
 MODEL_OPTIONS = {
-    "⚡ FLUX Schnell": "black-forest-labs/FLUX.1-schnell",
-    "🔥 FLUX Dev": "black-forest-labs/FLUX.1-dev",
-    "✨ SDXL Base": "stabilityai/stable-diffusion-xl-base-1.0",
-    "🌀 SD 1.5": "runwayml/stable-diffusion-v1-5"
+    "FLUX Schnell (Fast)": {
+        "id": "black-forest-labs/FLUX.1-schnell",
+        "negative_prompt": False
+    },
+    "FLUX Dev (Strict)": {
+        "id": "black-forest-labs/FLUX.1-dev",
+        "negative_prompt": False
+    },
+    "SDXL Base (Negative Prompt)": {
+        "id": "stabilityai/stable-diffusion-xl-base-1.0",
+        "negative_prompt": True
+    },
+    "Stable Diffusion 1.5 (Negative Prompt)": {
+        "id": "runwayml/stable-diffusion-v1-5",
+        "negative_prompt": True
+    }
 }
 
 # =========================================================
@@ -70,6 +82,12 @@ st.caption("Advanced OEM Seat Intelligence + Flashmind Trend Engineering")
 selected_model = st.sidebar.selectbox(
     "Choose AI Model",
     list(MODEL_OPTIONS.keys())
+)
+
+selected_model_config = MODEL_OPTIONS[selected_model]
+
+st.sidebar.caption(
+    f"Model ID: {selected_model_config['id']}"
 )
 
 uploaded_reference = st.sidebar.file_uploader(
@@ -148,11 +166,23 @@ with col3:
         3: ["Silver", "Blue", "Red"],
         5: ["Silver", "Orange", "Blue", "Red", "Gold"]
     }
-    
-    manual_color = st.selectbox(
-        "Select Palette",
-        color_choices.get(num_images)
-    )
+
+    palette_colors = color_choices.get(num_images, ["Silver"])
+
+    if color_control_mode:
+
+        manual_color = ", ".join(palette_colors)
+
+        st.caption(
+            f"Active Palette: {manual_color}"
+        )
+
+    else:
+
+        manual_color = st.selectbox(
+            "Select Palette",
+            palette_colors
+        )
     
     # =========================================================
     # 🌍 URL / IMAGE FEED ENGINE
@@ -274,22 +304,32 @@ with thread_cols[3]:
         "Sport Finish"
     )
 
+thread_color_options = [
+    "Red",
+    "Silver",
+    "Gold",
+    "Blue",
+    "Peach",
+    "Sky Blue",
+    "Black",
+    "White",
+    "Cream",
+    "Orange",
+    "Magenta"
+]
+
+if color_control_mode:
+
+    thread_color_defaults = palette_colors
+
+else:
+
+    thread_color_defaults = ["Red", "Silver"]
+
 thread_colors = st.multiselect(
     "Thread / Piping Colors",
-    [
-        "Red",
-        "Silver",
-        "Gold",
-        "Blue",
-        "Peach",
-        "Sky Blue",
-        "Black",
-        "White",
-        "Cream",
-        "Orange",
-        "Magenta"
-    ],
-    default=["Red", "Silver"]
+    thread_color_options,
+    default=thread_color_defaults
 )
 
 thread_pattern = st.selectbox(
@@ -360,14 +400,14 @@ if car == "Maruti Wagon R":
     if seat_mode == "Single Front Seat":
 
         wagonr_fixed_prompt += """
-        Generate a single-seat image.
+        Generate a front-view single-seat image.
         Generate ONLY ONE WagonR front seat.
         """
 
     elif seat_mode == "Dual Front Seats":
 
         wagonr_fixed_prompt += """
-        Generate a double-front-seat image.
+        Generate a front-view double-front-seat image.
         Generate ONLY TWO WagonR front seats.
         """
 
@@ -596,19 +636,29 @@ def fetch_market_references(query):
 # IMAGE GENERATION
 # =========================================================
 
-def generate_image(prompt, model_id):
+def generate_image(prompt, model_config, negative_prompt):
 
     try:
 
         client = InferenceClient(
-            model=model_id,
+            model=model_config["id"],
             token=HF_TOKEN
         )
 
+        generation_args = {
+            "width": 1024,
+            "height": 768,
+            "guidance_scale": 8.5,
+            "num_inference_steps": 35
+        }
+
+        if model_config["negative_prompt"]:
+
+            generation_args["negative_prompt"] = negative_prompt
+
         image = client.text_to_image(
             prompt,
-            width=1024,
-            height=768
+            **generation_args
         )
 
         return image
@@ -645,18 +695,26 @@ if st.button("🚀 EXECUTE FULL SUITE"):
 
     thread_prompt = ""
 
+    active_thread_colors = thread_colors
+
+    if color_control_mode:
+
+        active_thread_colors = palette_colors
+
     if piping_toggle:
 
         thread_prompt += f"""
         Premium piping enabled.
         Piping Colors:
-        {", ".join(thread_colors)}
+        {", ".join(active_thread_colors)}
         """
 
     if threading_toggle:
 
         thread_prompt += f"""
         Decorative threading enabled.
+        Thread Colors:
+        {", ".join(active_thread_colors)}
         Thread Pattern:
         {thread_pattern}
         """
@@ -683,8 +741,10 @@ if st.button("🚀 EXECUTE FULL SUITE"):
 
             seat_prompt = """
             STRICT WagonR single seat generation.
-            ONLY ONE seat.
-            Fixed integrated headrest mandatory.
+            Generate ONE front-view image of ONE WagonR front seat only.
+            Fixed integrated headrest mandatory, molded into the seat back.
+            Same Maruti Wagon R compact hatchback seat shape.
+            No second seat, no rear bench, no collage.
             Compact hatchback geometry.
             """
 
@@ -692,16 +752,20 @@ if st.button("🚀 EXECUTE FULL SUITE"):
 
             seat_prompt = """
             STRICT WagonR dual seat generation.
-            ONLY TWO seats.
-            Fixed integrated headrests mandatory.
+            Generate ONE front-view image of TWO WagonR front seats only.
+            Fixed integrated headrests mandatory, molded into both seat backs.
+            Same Maruti Wagon R compact hatchback seat shape.
+            No rear bench, no 4-seat layout, no collage.
             """
 
         else:
 
             seat_prompt = """
             STRICT WagonR 4-seat layout.
-            Front seats fixed integrated headrests.
+            Generate ONE image of the complete WagonR front-and-rear seat set.
+            Front seats must have fixed integrated headrests.
             Rear compact hatchback bench.
+            Same Maruti Wagon R compact hatchback seat shape.
             """
 
     else:
@@ -710,25 +774,52 @@ if st.button("🚀 EXECUTE FULL SUITE"):
 
             seat_prompt = """
             STRICT Grand Vitara SUV single seat.
+            Generate ONE front-view image of ONE Grand Vitara front seat only.
             Premium SUV seat geometry.
-            Integrated SUV headrest.
+            Integrated SUV headrest molded into the seat back.
+            Same Maruti Grand Vitara seat shape.
+            No second seat, no rear bench, no collage.
             """
 
         elif seat_mode == "Dual Front Seats":
 
             seat_prompt = """
             STRICT Grand Vitara dual seat generation.
+            Generate ONE front-view image of TWO Grand Vitara front seats only.
             Premium SUV contours.
-            Integrated SUV headrests.
+            Integrated SUV headrests molded into both seat backs.
+            Same Maruti Grand Vitara seat shape.
+            No rear bench, no 4-seat layout, no collage.
             """
 
         else:
 
             seat_prompt = """
             STRICT Grand Vitara full seat layout.
+            Generate ONE image of the complete Grand Vitara front-and-rear seat set.
             Premium SUV front & rear seats.
             Integrated SUV headrests.
+            Same Maruti Grand Vitara seat shape.
             """
+
+    reference_prompt = ""
+
+    if reference_url:
+
+        reference_prompt = f"""
+        OEM Reference Lock:
+        Use this reference URL as the visual direction for OEM seat shape, proportions, and styling:
+        {reference_url}
+        Match the selected vehicle seat family and do not invent a different car seat.
+        """
+
+    negative_prompt = """
+    extra seats, wrong seat count, detachable headrest, separate headrest rods,
+    removable headrest, floating headrest, sofa, couch, recliner, luxury lounge,
+    rear bench in single seat mode, second seat in single seat mode, four seats in front seat mode,
+    collage, multiple panels, split screen, cartoon, sketch, distorted car interior,
+    wrong vehicle, generic racing bucket seat, bus seat, office chair, low quality, blurry
+    """
 
     # =====================================================
     # FINAL PROMPT
@@ -736,6 +827,7 @@ if st.button("🚀 EXECUTE FULL SUITE"):
 
     final_prompt = f"""
     Professional automotive seat cover design.
+    Generate exactly one final image, not a collage.
 
     Vehicle:
     {car}
@@ -772,9 +864,11 @@ if st.button("🚀 EXECUTE FULL SUITE"):
     Instructions:
     {engineering_notes}
 
-    Selected Palette: {manual_color} 
+    Selected Palette: {manual_color}
     
     Reference URL: {reference_url} 
+
+    {reference_prompt}
     
     Vehicle Lock: 
     {wagonr_fixed_prompt} 
@@ -782,7 +876,12 @@ if st.button("🚀 EXECUTE FULL SUITE"):
     
     Critical Rules: 
     - obey exact seat count 
+    - obey exact selected seat mode
     - obey exact vehicle geometry 
+    - keep the selected vehicle seat shape
+    - single seat means one front-facing front seat only
+    - double seat means two front-facing front seats only
+    - full 4 seats means complete front-and-rear seat set only
     - maintain OEM realism 
     - maintain hatchback proportions 
     - maintain SUV proportions 
@@ -808,7 +907,8 @@ if st.button("🚀 EXECUTE FULL SUITE"):
 
         image = generate_image(
             final_prompt,
-            MODEL_OPTIONS[selected_model]
+            selected_model_config,
+            negative_prompt
         )
 
         if image:
@@ -908,6 +1008,17 @@ if st.button("🚀 EXECUTE FULL SUITE"):
         f"{car} {material} seat cover"
     )
 
+    if reference_url:
+
+        market_refs.insert(
+            0,
+            {
+                "img": reference_url,
+                "link": reference_url,
+                "src": "OEM Reference"
+            }
+        )
+
     st.subheader("🌍 Live Market Trends & Web References")
 
     if market_refs:
@@ -918,11 +1029,19 @@ if st.button("🚀 EXECUTE FULL SUITE"):
 
             with ref_cols[idx % 3]:
 
-                st.image(
-                    ref["img"],
-                    caption=f"Trend: {ref['src']}",
-                    use_container_width=True
-                )
+                ref_img = ref["img"]
+
+                if ref_img.lower().split("?")[0].endswith((".png", ".jpg", ".jpeg", ".webp")):
+
+                    st.image(
+                        ref_img,
+                        caption=f"Trend: {ref['src']}",
+                        use_container_width=True
+                    )
+
+                else:
+
+                    st.caption(f"Reference: {ref['src']}")
 
                 st.link_button(
                     f"🔗 Open {ref['src']}",
